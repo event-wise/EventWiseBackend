@@ -38,11 +38,11 @@ public class User extends BaseEntity{
     private String displayedName;
 
     @NotNull
-    @Size(min = 5, max = 56)
+    @Size(min = 5)
     private String password;
 
     @NotNull
-    @NotNull
+    @NotEmpty
     @Size(max = 20)
     private String location;
 

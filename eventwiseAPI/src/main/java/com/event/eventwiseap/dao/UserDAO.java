@@ -12,6 +12,7 @@ public interface UserDAO extends JpaRepository<User, Long> {
     User getUserByUsername(String username);
 
     boolean existsByEmail(String email);
+    boolean existsByUsername(String username);
 
     @Transactional
     Long removeUserById(Long id);

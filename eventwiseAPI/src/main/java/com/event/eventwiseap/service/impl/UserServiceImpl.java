@@ -65,4 +65,20 @@ public class UserServiceImpl implements UserService {
         }
         return userDAO.removeUserById(id);
     }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        if (Objects.isNull(email)) {
+            throw new ObjectIsNullException("Search param cannot be null");
+        }
+        return userDAO.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        if (Objects.isNull(username)) {
+            throw new ObjectIsNullException("Search param cannot be null");
+        }
+        return userDAO.existsByUsername(username);
+    }
 }
