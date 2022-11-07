@@ -46,7 +46,7 @@ public class User extends BaseEntity{
     @Size(max = 20)
     private String location;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<Role> roles = new HashSet<>();
 
     /* TO DO:
