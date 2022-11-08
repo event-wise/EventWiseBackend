@@ -2,20 +2,23 @@ package com.event.eventwiseap.service.impl;
 
 import com.event.eventwiseap.dao.UserDAO;
 import com.event.eventwiseap.exception.ObjectIsNullException;
+import com.event.eventwiseap.model.Group;
 import com.event.eventwiseap.model.User;
+import com.event.eventwiseap.service.GroupService;
 import com.event.eventwiseap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 
 public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
+
+    private final GroupService groupService;
 
     @Override
     //@Transactional
@@ -63,7 +66,35 @@ public class UserServiceImpl implements UserService {
         if (Objects.isNull(id)) {
             throw new ObjectIsNullException("ID cannot be null");
         }
-        return userDAO.removeUserById(id);
+        Long retVal = null;
+        User user = userDAO.getUserById(id);
+        Set<Group> ownedGroups =  new HashSet<>(user.getOwnedGroups());
+        List<User> newOwners = new ArrayList<>();
+        List<Group> toDeleteGroups = new ArrayList<>();
+        for(Group group : ownedGroups){
+            List<User> members = userDAO.getUsersByGroupsContains(group);
+            members.remove(user);
+            user.removeGroup(group);
+            if(members.size() >= 1){
+                User newOwner = members.get(0);
+                group.setOwner(newOwner);
+                newOwner.addGroup(group);
+                groupService.save(group);
+                newOwners.add(newOwner);
+            }
+            else{
+                toDeleteGroups.add(group);
+            }
+        }
+        userDAO.save(user);
+        for(Group group:toDeleteGroups){
+            groupService.delete(group.getId());
+        }
+        retVal = userDAO.removeUserById(id);
+        for(User newOwner: newOwners){
+            userDAO.save(newOwner);
+        }
+        return retVal;
     }
 
     @Override
