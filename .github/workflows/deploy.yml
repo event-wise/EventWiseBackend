@@ -17,6 +17,10 @@ jobs:
         with:
           java-version: '11'
       - name: Build with Maven
+        env:
+          password: ${{ secrets.DB_PASSWORD}}
+          url: ${{ secrets.AWS_URL}}
+          username: ${{ secrets.DB_USERNAME}}
         run: mvn clean install -B package -DskipTests --file eventwiseAPI/pom.xml
       - name: Upload JAR
         uses: actions/upload-artifact@v2
