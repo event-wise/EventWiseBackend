@@ -21,6 +21,7 @@ jobs:
           password: ${{ secrets.DB_PASSWORD}}
           url: ${{ secrets.AWS_URL}}
           username: ${{ secrets.DB_USERNAME}}
+        echo {url}
         run: mvn clean install -B package -DskipTests --file eventwiseAPI/pom.xml
       - name: Upload JAR
         uses: actions/upload-artifact@v2
