@@ -1,9 +1,11 @@
 package com.event.eventwiseap.service.impl;
 
 import com.event.eventwiseap.dao.EventDAO;
+import com.event.eventwiseap.exception.GeneralException;
 import com.event.eventwiseap.exception.ObjectIsNullException;
 import com.event.eventwiseap.model.Event;
 import com.event.eventwiseap.service.EventService;
+import com.event.eventwiseap.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +17,15 @@ import java.util.Objects;
 public class EventServiceImpl implements EventService {
     private final EventDAO eventDAO;
 
+    private final GroupService groupService;
     @Override
-    public Event create(Event event) {
+    public Event save(Event event) {
         if (Objects.isNull(event)) {
             throw new ObjectIsNullException("At the creation of an event, object cannot be null");
         }
-        return eventDAO.save(event);
+        event = eventDAO.save(event);
+        groupService.save(event.getGroup());
+        return event;
     }
 
     @Override
@@ -30,19 +35,22 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event getEventById(Long id) {
-        return null;
+        if (Objects.isNull(id)) {
+            throw new ObjectIsNullException("Event ID cannot be null");
+        }
+        return eventDAO.getById(id);
     }
 
-    @Override
-    public Event update(Event updatedEvent) {
-        if (Objects.isNull(updatedEvent)) {
-            throw new ObjectIsNullException("At the creation of an event, object cannot be null");
-        }
-        return eventDAO.save(updatedEvent);
-    }
 
     @Override
     public Long delete(Long id) {
-        return null;
+        if (Objects.isNull(id)) {
+            throw new ObjectIsNullException("Event ID cannot be null");
+        }
+        Event event = eventDAO.getEventById(id);
+        event.removeFromGroup();
+        eventDAO.save(event);
+        groupService.save(event.getGroup());
+        return eventDAO.removeById(id);
     }
 }

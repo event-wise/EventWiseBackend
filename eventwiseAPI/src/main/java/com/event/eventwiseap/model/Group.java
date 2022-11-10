@@ -35,6 +35,14 @@ public class Group extends BaseEntity {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     private Set<Event> events = new HashSet<>();
 
+    public void addEvent(Event event){
+        this.events.add(event);
+    }
+
+    public void removeEvent(Event event){
+        this.events.remove(event);
+    }
+
 
 
     /* To DO

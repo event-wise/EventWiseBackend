@@ -1,9 +1,7 @@
 package com.event.eventwiseap;
 
-import com.event.eventwiseap.model.Group;
-import com.event.eventwiseap.model.Role;
-import com.event.eventwiseap.model.RoleType;
-import com.event.eventwiseap.model.User;
+import com.event.eventwiseap.model.*;
+import com.event.eventwiseap.service.EventService;
 import com.event.eventwiseap.service.GroupService;
 import com.event.eventwiseap.service.RoleService;
 import com.event.eventwiseap.service.UserService;
@@ -13,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,6 +27,8 @@ class EventwiseApiApplicationTests {
     @Autowired
     private GroupService groupService;
 
+    @Autowired
+    private EventService eventService;
     private final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Test
@@ -101,10 +103,30 @@ class EventwiseApiApplicationTests {
         Long userGroupId = userGroup.getId();
 
         // 2.3) Delete members
-        Long deleted = userService.delete(user.getId());
-        deleted = userService.delete(admin.getId());
-        System.out.println(deleted);
+//        Long deleted = userService.delete(user.getId());
+//        deleted = userService.delete(admin.getId());
+//        System.out.println(deleted);
         // 4) Create Event
+        LocalDateTime now = LocalDateTime.now();
+//        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+//        String formatDateTime = now.format(format);
+
+        Event adminEvent = Event.builder()
+                .dateTime(now)
+                .name("Admin's event")
+                .description("Admin is testing the relations")
+                .location("ISTANBUL")
+                .type("TEST")
+                .acceptedMembers(new HashSet<>())
+                .build();
+        adminEvent.addToGroup(adminGroup, admin);
+        adminEvent.accept(user);
+
+        adminEvent = eventService.save(adminEvent);
+
+
+        System.out.println("Test point");
+        eventService.delete(adminEvent.getId());
 
 
     }

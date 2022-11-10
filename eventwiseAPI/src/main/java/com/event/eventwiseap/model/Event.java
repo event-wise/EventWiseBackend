@@ -31,10 +31,10 @@ public class Event extends BaseEntity{
     @Size(max = 50)
     private String name;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     private Group group;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     private User organizer;
 
     @NotNull
@@ -52,15 +52,44 @@ public class Event extends BaseEntity{
     private String type;
 
     @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime creationTime;
 
     @Timestamp
     @NotNull
-    @NotEmpty
     private LocalDateTime dateTime;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     private Set<User> acceptedMembers = new HashSet<>();
+
+    public void addToGroup(Group group, User user){
+        this.organizer = user;
+        this.group = group;
+        this.acceptedMembers.add(user);
+        group.addEvent(this);
+    }
+
+    public void removeFromGroup(){
+        this.acceptedMembers.clear();
+        group.removeEvent(this);
+    }
+
+    public void accept(User user){
+        this.acceptedMembers.add(user);
+    }
+
+    public boolean isAccepted(User user){
+        return this.acceptedMembers.contains(user);
+    }
+
+    public void reject(User user){
+        if(isAccepted(user)){
+            this.acceptedMembers.remove(user);
+        }
+    }
+
+
+
 
 //    @OneToMany(mappedBy = "User", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 //    private Set<User> rejectedMembers = new HashSet<>();
