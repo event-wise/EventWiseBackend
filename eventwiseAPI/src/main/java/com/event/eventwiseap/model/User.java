@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -47,14 +49,15 @@ public class User extends BaseEntity{
     @Size(max = 20)
     private String location;
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST}, mappedBy = "acceptedMembers")
+    private Set<Event> acceptedEvents = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST}, mappedBy = "groupMembers")
+    private Set<Group> groups = new HashSet<>();
+
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<Role> roles = new HashSet<>();
-
-//    @ManyToMany
-//    private Set<Event> acceptedEvents = new HashSet<>();
-
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    private Set<Group> ownedGroups = new HashSet<>();
 
     @Override
     public boolean equals(Object obj) {
@@ -65,30 +68,20 @@ public class User extends BaseEntity{
         return this.id.equals(user.getId());
     }
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    private Set<Group> groups = new HashSet<>();
-
-    public void addGroup(Group group){
-        if (this.id.equals(group.getOwner().getId())) {
-            this.ownedGroups.add(group);
-        }
-        this.groups.add(group);
+    public boolean addGroup(Group group){
+        return this.groups.add(group);
     }
 
-    public void removeGroup(Group group){
-        if (this.id.equals(group.getOwner().getId())){
-            this.ownedGroups.remove(group);
-        }
-        this.groups.remove(group);
+    public boolean removeGroup(Group group){
+        return this.groups.remove(group);
     }
 
+    public boolean acceptEvent(Event event){
+        return this.acceptedEvents.add(event);
+    }
 
-    /* TO DO:
-    * Relate to Group entity: many to many managed by Group
-    * Accepted events: many to many mapped by User
-    * Rejected events: many to many mapped by User
-    * Pending events:  many to many mapped by User
-    * */
-
+    public boolean rejectEvent(Event event){
+        return this.acceptedEvents.remove(event);
+    }
 
 }

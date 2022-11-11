@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface EventService {
     // Create and update
+    @Transactional
     Event save(Event event);
 
     // Read

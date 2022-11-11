@@ -66,35 +66,19 @@ public class UserServiceImpl implements UserService {
         if (Objects.isNull(id)) {
             throw new ObjectIsNullException("ID cannot be null");
         }
-        Long retVal = null;
         User user = userDAO.getUserById(id);
-        Set<Group> ownedGroups =  new HashSet<>(user.getOwnedGroups());
-        List<User> newOwners = new ArrayList<>();
-        List<Group> toDeleteGroups = new ArrayList<>();
-        for(Group group : ownedGroups){
-            List<User> members = userDAO.getUsersByGroupsContains(group);
-            members.remove(user);
-            user.removeGroup(group);
-            if(members.size() >= 1){
-                User newOwner = members.get(0);
-                group.setOwner(newOwner);
-                newOwner.addGroup(group);
-                groupService.save(group);
-                newOwners.add(newOwner);
+        Set<Group> groups = new HashSet<>(user.getGroups());
+        for(Group group: groups){
+            group.removeMember(user);
+            if (group.isEmpty()){
+                groupService.delete(group.getId());
+                continue;
             }
-            else{
-                toDeleteGroups.add(group);
-            }
+            if(group.isOwner(user))
+                group.assignOwner();
+            groupService.save(group);
         }
-        userDAO.save(user);
-        for(Group group:toDeleteGroups){
-            groupService.delete(group.getId());
-        }
-        retVal = userDAO.removeUserById(id);
-        for(User newOwner: newOwners){
-            userDAO.save(newOwner);
-        }
-        return retVal;
+        return userDAO.removeUserById(id);
     }
 
     @Override

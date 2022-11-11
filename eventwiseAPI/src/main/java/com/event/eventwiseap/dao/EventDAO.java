@@ -12,6 +12,6 @@ public interface EventDAO extends JpaRepository<Event, Long> {
 
     Event getEventById(Long id);
 
-     @Transactional
+    @Transactional
     Long removeById(Long id);
 }

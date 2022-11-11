@@ -8,8 +8,10 @@ import com.event.eventwiseap.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +50,7 @@ public class GroupServiceImpl implements GroupService {
         return groupDAO.save(group);
     }
 
+
     @Override
     public Long delete(Long id) {
         // delete all events then delete group
@@ -55,9 +58,13 @@ public class GroupServiceImpl implements GroupService {
         if (Objects.isNull(id)) {
             throw new ObjectIsNullException("When deleting a group, id cannot be null");
         }
-        Long retVal = null;
-        retVal = groupDAO.removeById(id);
-        return retVal;
+        Group group = groupDAO.getGroupById(id);
+        Set<User> users = group.getGroupMembers();
+        for (User user:users)
+            user.removeGroup(group);
+        group.setGroupMembers(new HashSet<>());
+        groupDAO.save(group);
+       return groupDAO.removeById(id);
     }
 
     @Override

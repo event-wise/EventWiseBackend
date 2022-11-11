@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -31,11 +34,22 @@ public class Event extends BaseEntity{
     @Size(max = 50)
     private String name;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false) // non null relationship optional = false
+    @JoinColumn(name = "group_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE) // the event will be deleted on the action of related group deletion
     private Group group;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "organizer_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE) // the event will be deleted on the action of organizer user deletion
     private User organizer;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinTable(name = "event_accepted_members",
+            joinColumns = {@JoinColumn(name = "event_id")},
+            inverseJoinColumns = {@JoinColumn(name = "accepted_members_id")}
+    )
+    private Set<User> acceptedMembers = new HashSet<>();
 
     @NotNull
     @NotEmpty
@@ -59,40 +73,22 @@ public class Event extends BaseEntity{
     @NotNull
     private LocalDateTime dateTime;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
-    private Set<User> acceptedMembers = new HashSet<>();
+    public boolean acceptedBy(User user){
+        boolean eventAccepted = this.acceptedMembers.add(user);
+        boolean userAccepted = user.acceptEvent(this);
 
-    public void addToGroup(Group group, User user){
-        this.organizer = user;
-        this.group = group;
-        this.acceptedMembers.add(user);
-        group.addEvent(this);
+        return userAccepted && eventAccepted;
     }
 
-    public void removeFromGroup(){
-        this.acceptedMembers.clear();
-        group.removeEvent(this);
-    }
-
-    public void accept(User user){
-        this.acceptedMembers.add(user);
-    }
 
     public boolean isAccepted(User user){
         return this.acceptedMembers.contains(user);
     }
 
-    public void reject(User user){
-        if(isAccepted(user)){
-            this.acceptedMembers.remove(user);
-        }
+    public boolean rejectedBy(User user){
+        boolean eventRejected = this.acceptedMembers.remove(user);
+        boolean userRejected = user.rejectEvent(this);
+        return eventRejected && userRejected;
     }
-
-
-
-
-//    @OneToMany(mappedBy = "User", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-//    private Set<User> rejectedMembers = new HashSet<>();
-
 
 }

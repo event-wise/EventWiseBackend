@@ -33,6 +33,8 @@ class EventwiseApiApplicationTests {
 
     @Test
     void contextLoads() {
+        boolean someTestBool = false;
+        Long someTestLong = -1L;
         // 0) Get roles
         Role admin_role = roleService.findByName(RoleType.ROLE_ADMIN);
         Role user_role = roleService.findByName(RoleType.ROLE_USER);
@@ -53,7 +55,7 @@ class EventwiseApiApplicationTests {
                 .password(encoder.encode("bal_admin"))
                 .roles(admin_roles)
                 .groups(new HashSet<>())
-                .ownedGroups(new HashSet<>())
+                .acceptedEvents(new HashSet<>())
                 .build();
 
         User user = User.builder()
@@ -64,7 +66,7 @@ class EventwiseApiApplicationTests {
                 .password(encoder.encode("ordinary"))
                 .roles(user_roles)
                 .groups(new HashSet<>())
-                .ownedGroups(new HashSet<>())
+                .acceptedEvents(new HashSet<>())
                 .build();
 
         admin = userService.create(admin); // Create user
@@ -77,33 +79,41 @@ class EventwiseApiApplicationTests {
         Group adminGroup = Group.builder()
                 .groupName("Admin's group")
                 .owner(userService.getById(adminId)) // Read user
-                .events(new HashSet<>())
+                .groupMembers(new HashSet<>())
                 .build();
 
         Group userGroup = Group.builder()
                 .groupName("User's group")
                 .owner(userService.getById(userId)) // Read user
-                .events(new HashSet<>())
+                .groupMembers(new HashSet<>())
                 .build();
 
         adminGroup = groupService.create(adminGroup); // Create Group
         userGroup = groupService.create(userGroup); // Create Group
-        // 2.1) Groups and creators
-        admin.addGroup(adminGroup);
-        user.addGroup(userGroup);
+        // 2.1) Admin group and members
+        boolean added = adminGroup.addMember(admin);
+        System.out.println(added);
+        added = adminGroup.addMember(user);
+        System.out.println(added);
+        adminGroup = groupService.save(adminGroup);
 
-        // 2.2) Groups and members
-        admin.addGroup(userGroup);
-        user.addGroup(adminGroup);
+        // 2.2) User group and members
+        added = userGroup.addMember(user);
+        System.out.println(added);
+        added = userGroup.addMember(admin);
+        System.out.println(added);
+        userGroup = groupService.save(userGroup);
 
-        admin = userService.update(admin);
-        user = userService.update(user);
+        System.out.println("SUCCESS");
+//         2.3) Delete group (relation member-group)
+//        Long deleted = groupService.delete(userGroup.getId());
+//        System.out.println(deleted);
+//        deleted = groupService.delete(adminGroup.getId());
+//        System.out.println(deleted);
 
-        Long adminGroupId = adminGroup.getId();
-        Long userGroupId = userGroup.getId();
-
-        // 2.3) Delete members
+//        // 2.4) Delete members (relation member-group)
 //        Long deleted = userService.delete(user.getId());
+//        System.out.println(deleted);
 //        deleted = userService.delete(admin.getId());
 //        System.out.println(deleted);
         // 4) Create Event
@@ -117,17 +127,27 @@ class EventwiseApiApplicationTests {
                 .description("Admin is testing the relations")
                 .location("ISTANBUL")
                 .type("TEST")
+                .organizer(admin)
+                .group(adminGroup)
                 .acceptedMembers(new HashSet<>())
                 .build();
-        adminEvent.addToGroup(adminGroup, admin);
-        adminEvent.accept(user);
 
+        adminEvent = eventService.save(adminEvent); // CRUCIAL:BEFORE ADDING ANY MEMBER, SAVE THE GROUP FOR PERSISTENCE!
+
+
+        someTestBool = adminEvent.acceptedBy(admin);
+        System.out.println(someTestBool);
+        someTestBool = adminEvent.acceptedBy(user);
+        System.out.println(someTestBool);
         adminEvent = eventService.save(adminEvent);
+        System.out.println(adminEvent.getId());
 
+//        eventService.delete(adminEvent.getId());
 
-        System.out.println("Test point");
-        eventService.delete(adminEvent.getId());
-
+        // 5) Further deletion
+        // 5.1) Delete event organizer
+        someTestLong = userService.delete(admin.getId());
+        System.out.println(someTestLong);
 
     }
 
