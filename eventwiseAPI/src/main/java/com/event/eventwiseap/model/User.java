@@ -56,6 +56,7 @@ public class User extends BaseEntity{
     private Set<Group> groups = new HashSet<>();
 
 
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<Role> roles = new HashSet<>();
 

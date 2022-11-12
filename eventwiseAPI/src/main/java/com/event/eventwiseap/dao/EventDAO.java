@@ -6,12 +6,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
 
 public interface EventDAO extends JpaRepository<Event, Long> {
     List<Event> getEventsByAcceptedMembersContaining(User user);
 
     Event getEventById(Long id);
 
+    Set<Event> getEventsByOrganizerId(Long organizerId);
+
+    Set<Event> getEventsByGroupId(Long groupId);
     @Transactional
     Long removeById(Long id);
 }

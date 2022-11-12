@@ -33,14 +33,17 @@ public class Group extends BaseEntity {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH})
     @JoinTable(name = "group_members",
             joinColumns = {@JoinColumn(name = "group_id")},
-            inverseJoinColumns = {@JoinColumn(name = "members_id")}
+            inverseJoinColumns = {@JoinColumn(name = "user_id")}
     )
     Set<User> groupMembers = new HashSet<>();
 
+
+
     public boolean addMember(User member){
+
         boolean memberAdded = this.groupMembers.add(member);
         boolean groupAdded = member.addGroup(this);
         return memberAdded && groupAdded;

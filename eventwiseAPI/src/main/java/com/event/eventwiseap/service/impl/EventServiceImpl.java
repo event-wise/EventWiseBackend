@@ -83,6 +83,24 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public Set<Event> getEventsByOrganizerId(Long organizerId) {
+        if(Objects.isNull(organizerId)){
+            throw new ObjectIsNullException("Organizer ID cannot be null");
+        }
+
+        return eventDAO.getEventsByOrganizerId(organizerId);
+    }
+
+    @Override
+    public Set<Event> getEventsByGroupId(Long groupId) {
+        if(Objects.isNull(groupId)){
+            throw new ObjectIsNullException("Group ID cannot be null");
+        }
+
+        return eventDAO.getEventsByOrganizerId(groupId);
+    }
+
+    @Override
     public List<Event> getEventsByUserId(Long userId) {
         return null;
     }

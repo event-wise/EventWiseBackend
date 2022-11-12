@@ -2,8 +2,10 @@ package com.event.eventwiseap.service.impl;
 
 import com.event.eventwiseap.dao.GroupDAO;
 import com.event.eventwiseap.exception.ObjectIsNullException;
+import com.event.eventwiseap.model.Event;
 import com.event.eventwiseap.model.Group;
 import com.event.eventwiseap.model.User;
+import com.event.eventwiseap.service.EventService;
 import com.event.eventwiseap.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
     private final GroupDAO groupDAO;
+
+    private final EventService eventService;
 
     @Override
     public Group create(Group group) {
@@ -58,6 +62,10 @@ public class GroupServiceImpl implements GroupService {
         if (Objects.isNull(id)) {
             throw new ObjectIsNullException("When deleting a group, id cannot be null");
         }
+        Set<Event> groupEvents = eventService.getEventsByGroupId(id);
+        for(Event event: groupEvents)
+            eventService.delete(event.getId());
+
         Group group = groupDAO.getGroupById(id);
         Set<User> users = group.getGroupMembers();
         for (User user:users)

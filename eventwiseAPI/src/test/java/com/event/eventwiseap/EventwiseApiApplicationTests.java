@@ -146,8 +146,10 @@ class EventwiseApiApplicationTests {
 
         // 5) Further deletion
         // 5.1) Delete event organizer
-        someTestLong = userService.delete(admin.getId());
-        System.out.println(someTestLong);
+//        someTestLong = userService.delete(admin.getId());
+//        System.out.println(someTestLong);
+        // 5.2) Delete group
+        groupService.delete(adminGroup.getId());
 
     }
 
