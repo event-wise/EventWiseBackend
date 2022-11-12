@@ -31,7 +31,6 @@ jobs:
     needs: build
     name: Deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 3
     steps:
       - name: Download JAR
         uses: actions/download-artifact@v2
@@ -49,4 +48,5 @@ jobs:
           environment_name: Eventwise-env
           version_label: ${{github.SHA}}
           region: eu-central-1
-          deployment_package: eventwiseAPI-0.0.1-SNAPSHOT.jar    
+          deployment_package: eventwiseAPI-0.0.1-SNAPSHOT.jar
+          recovary_wait_time: 120
