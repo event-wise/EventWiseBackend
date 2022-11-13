@@ -40,8 +40,6 @@ public class Group extends BaseEntity {
     )
     Set<User> groupMembers = new HashSet<>();
 
-
-
     public boolean addMember(User member){
 
         boolean memberAdded = this.groupMembers.add(member);
@@ -67,27 +65,5 @@ public class Group extends BaseEntity {
         this.owner = it.next();
     }
 
-//    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
-//    private Set<User> members = new HashSet<>();
-
-//    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
-//    private Set<Event> events = new HashSet<>();
-
-
-
-//    public void addEvent(Event event){
-//        this.events.add(event);
-//    }
-//
-//    public void removeEvent(Event event){
-//        this.events.remove(event);
-//    }
-
-
-
-    /* To DO
-    * Relate to active events mapped by group
-    * Relate to passive events mapped by group
-    * */
 
 }

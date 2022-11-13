@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -21,37 +20,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventDAO eventDAO;
-    private final UserDAO userDAO;
-
-//    private final GroupService groupService;
-
-
-//    @Override
-//    public List<Event> getEventsByUserId(Long userId) {
-//        return null;
-//    }
-//
-//    @Override
-//    public Event getEventById(Long id) {
-//        if (Objects.isNull(id)) {
-//            throw new ObjectIsNullException("Event ID cannot be null");
-//        }
-//        return eventDAO.getById(id);
-//    }
-//
-//
-//    @Override
-//    public Long delete(Long id) {
-//        if (Objects.isNull(id)) {
-//            throw new ObjectIsNullException("Event ID cannot be null");
-//        }
-//        Event event = eventDAO.getEventById(id);
-//        event.removeFromGroup();
-//        eventDAO.save(event);
-//        groupService.save(event.getGroup());
-//        return eventDAO.removeById(id);
-//    }
-
 
     @Transactional
     @Override
@@ -59,13 +27,12 @@ public class EventServiceImpl implements EventService {
         if(Objects.isNull(event)){
             throw new ObjectIsNullException("Event object cannot be null");
         }
-
         return eventDAO.save(event);
     }
 
     @Override
     public Event getEventById(Long id) {
-        return null;
+        return eventDAO.getEventById(id);
     }
 
     @Override
@@ -101,7 +68,10 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> getEventsByUserId(Long userId) {
-        return null;
+    public Set<Event> getEventsByUser(User user) {
+        if(Objects.isNull(user)){
+            throw new ObjectIsNullException("User cannot be null");
+        }
+        return eventDAO.getEventsByAcceptedMembersContaining(user);
     }
 }

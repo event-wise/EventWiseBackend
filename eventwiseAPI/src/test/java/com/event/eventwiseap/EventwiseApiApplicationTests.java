@@ -1,10 +1,7 @@
 package com.event.eventwiseap;
 
 import com.event.eventwiseap.model.*;
-import com.event.eventwiseap.service.EventService;
-import com.event.eventwiseap.service.GroupService;
-import com.event.eventwiseap.service.RoleService;
-import com.event.eventwiseap.service.UserService;
+import com.event.eventwiseap.service.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +23,9 @@ class EventwiseApiApplicationTests {
 
     @Autowired
     private GroupService groupService;
+
+    @Autowired
+    private LogService logService;
 
     @Autowired
     private EventService eventService;
@@ -90,6 +90,17 @@ class EventwiseApiApplicationTests {
 
         adminGroup = groupService.create(adminGroup); // Create Group
         userGroup = groupService.create(userGroup); // Create Group
+        Log adminLog = Log.builder().group(adminGroup)
+                .logMessage(admin.getDisplayedName() + " created the group named " + adminGroup.getGroupName())
+                .build();
+        Log userLog = Log.builder().group(userGroup)
+                .logMessage(user.getDisplayedName() + " created the group named " + userGroup.getGroupName())
+                .build();
+
+        logService.save(adminLog);
+        logService.save(userLog);
+
+
         // 2.1) Admin group and members
         boolean added = adminGroup.addMember(admin);
         System.out.println(added);
@@ -104,12 +115,21 @@ class EventwiseApiApplicationTests {
         System.out.println(added);
         userGroup = groupService.save(userGroup);
 
+        Log memberLog1 = Log.builder().group(adminGroup)
+                .logMessage(user.getDisplayedName() + " joined the group")
+                .build();
+        logService.save(memberLog1);
+
+        Log memberLog2 = Log.builder().group(userGroup)
+                .logMessage(admin.getDisplayedName() + " joined the group")
+                .build();
+
         System.out.println("SUCCESS");
 //         2.3) Delete group (relation member-group)
-//        Long deleted = groupService.delete(userGroup.getId());
-//        System.out.println(deleted);
-//        deleted = groupService.delete(adminGroup.getId());
-//        System.out.println(deleted);
+        Long deleted = groupService.delete(userGroup.getId());
+        System.out.println(deleted);
+        deleted = groupService.delete(adminGroup.getId());
+        System.out.println(deleted);
 
 //        // 2.4) Delete members (relation member-group)
 //        Long deleted = userService.delete(user.getId());
