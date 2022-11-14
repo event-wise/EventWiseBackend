@@ -1,6 +1,7 @@
 package com.event.eventwiseap.service;
 
 import com.event.eventwiseap.model.User;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,8 +17,10 @@ public interface UserService {
     boolean existsByUsername(String username);
 
     // Update
+    @Transactional
     User update(User updatedUser);
 
     // Remove
+    @Transactional
     Long delete(Long id);
 }

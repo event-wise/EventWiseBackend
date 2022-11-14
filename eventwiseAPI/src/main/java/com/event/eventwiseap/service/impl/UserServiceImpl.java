@@ -1,21 +1,29 @@
 package com.event.eventwiseap.service.impl;
 
+import com.event.eventwiseap.dao.EventDAO;
 import com.event.eventwiseap.dao.UserDAO;
 import com.event.eventwiseap.exception.ObjectIsNullException;
+import com.event.eventwiseap.model.Event;
+import com.event.eventwiseap.model.Group;
 import com.event.eventwiseap.model.User;
+import com.event.eventwiseap.service.EventService;
+import com.event.eventwiseap.service.GroupService;
 import com.event.eventwiseap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 
 public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
+
+    private final GroupService groupService;
+
+    private final EventService eventService;
 
     @Override
     //@Transactional
@@ -62,6 +70,25 @@ public class UserServiceImpl implements UserService {
     public Long delete(Long id) {
         if (Objects.isNull(id)) {
             throw new ObjectIsNullException("ID cannot be null");
+        }
+        Set<Event> organized = eventService.getEventsByOrganizerId(id);
+        for(Event event:organized)
+            eventService.delete(event.getId());
+
+
+        User user = userDAO.getUserById(id);
+        Set<Group> groups = new HashSet<>(user.getGroups());
+
+
+        for(Group group: groups){
+            group.removeMember(user);
+            if (group.isEmpty()){
+                groupService.delete(group.getId());
+                continue;
+            }
+            if(group.isOwner(user))
+                group.assignOwner();
+            groupService.save(group);
         }
         return userDAO.removeUserById(id);
     }
