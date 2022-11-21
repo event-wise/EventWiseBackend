@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Response {
+    private Integer status = 200;
     private boolean success;
     private String message;
 }

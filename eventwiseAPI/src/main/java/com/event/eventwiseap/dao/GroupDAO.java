@@ -10,7 +10,11 @@ import java.util.Set;
 
 public interface GroupDAO extends JpaRepository<Group, Long> {
     Group getGroupById(Long id);
+    Set<Group> getGroupsByGroupMembersContaining(User user);
+
     List<Group> getAllByOwner(User user);
+
+
 
     Long deleteGroupByOwner(User user);
 

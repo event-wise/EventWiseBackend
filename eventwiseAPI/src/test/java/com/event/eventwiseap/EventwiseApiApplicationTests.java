@@ -69,8 +69,8 @@ class EventwiseApiApplicationTests {
                 .acceptedEvents(new HashSet<>())
                 .build();
 
-        admin = userService.create(admin); // Create user
-        user = userService.create(user); // Create user
+        admin = userService.save(admin); // Create user
+        user = userService.save(user); // Create user
 
         Long adminId = admin.getId();
         Long userId = user.getId();
@@ -88,8 +88,8 @@ class EventwiseApiApplicationTests {
                 .groupMembers(new HashSet<>())
                 .build();
 
-        adminGroup = groupService.create(adminGroup); // Create Group
-        userGroup = groupService.create(userGroup); // Create Group
+        adminGroup = groupService.save(adminGroup); // Create Group
+        userGroup = groupService.save(userGroup); // Create Group
         Log adminLog = Log.builder().group(adminGroup)
                 .logMessage(admin.getDisplayedName() + " created the group named " + adminGroup.getGroupName())
                 .build();

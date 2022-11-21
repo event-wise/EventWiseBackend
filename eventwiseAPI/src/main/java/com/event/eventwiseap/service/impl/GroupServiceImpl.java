@@ -22,18 +22,11 @@ public class GroupServiceImpl implements GroupService {
 
     private final EventService eventService;
 
-    @Override
-    public Group create(Group group) {
-        if (Objects.isNull(group)) {
-            throw new ObjectIsNullException("At the creation of a group, object cannot be null");
-        }
-        return groupDAO.save(group);
-    }
 
     @Override
     public Group getById(Long id) {
         if (Objects.isNull(id)) {
-            throw new ObjectIsNullException("User cannot be null");
+            throw new ObjectIsNullException("Group ID cannot be null (group details)");
         }
         return groupDAO.getById(id);
     }
@@ -41,7 +34,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public List<Group> getGroupsByOwner(User user) {
         if (Objects.isNull(user)) {
-            throw new ObjectIsNullException("User cannot be null");
+            throw new ObjectIsNullException("User cannot be null (group by owner)");
         }
         return groupDAO.getAllByOwner(user);
     }
@@ -49,7 +42,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public Group save(Group group) {
         if (Objects.isNull(group)) {
-            throw new ObjectIsNullException("At the creation of a group, object cannot be null");
+            throw new ObjectIsNullException("Group cannot be null (save)");
         }
         return groupDAO.save(group);
     }
@@ -57,10 +50,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public Long delete(Long id) {
-        // delete all events then delete group
 
         if (Objects.isNull(id)) {
-            throw new ObjectIsNullException("When deleting a group, id cannot be null");
+            throw new ObjectIsNullException("Group ID cannot be null (delete)");
         }
         Set<Event> groupEvents = eventService.getEventsByGroupId(id);
         for(Event event: groupEvents)
@@ -78,7 +70,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public Long deleteByOwner(User user) {
         if (Objects.isNull(user)) {
-            throw new ObjectIsNullException("When deleting a group, user cannot be null");
+            throw new ObjectIsNullException("User cannot be null (delete by owner)");
         }
 
         return groupDAO.deleteGroupByOwner(user);

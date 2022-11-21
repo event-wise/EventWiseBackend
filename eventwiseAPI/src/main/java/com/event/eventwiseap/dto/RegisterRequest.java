@@ -14,9 +14,9 @@ public class RegisterRequest {
     @Size(min = 5, max = 20)
     private String username;
 
-    @NotBlank
-    @Size(max = 50)
-    @Email
+    @NotBlank(message = "E-mail cannot be empty")
+    @Size(max = 50, message = "E-mail must contain less than 50 characters")
+    @Email(message = "Not a proper E-mail")
     private String email;
 
     @NotBlank
@@ -30,6 +30,4 @@ public class RegisterRequest {
     @NotBlank
     @Size(max = 20)
     private String location;
-
-    private String role;
 }
