@@ -163,4 +163,35 @@ public class AccountController {
         response.setMessage("Profile updated successfully");
         return response;
     }
+
+    @PostMapping("/change-password")
+    public Response changePassword(@RequestBody @Valid PasswordChangeRequest passwordChangeRequest, HttpServletRequest req){
+        final HttpSession session = req.getSession();
+        final String username = session.getAttribute(SESSION_USERNAME).toString();
+        User user = userService.getById(passwordChangeRequest.getId());
+        if(Objects.isNull(user)){
+            throw new GeneralException("This profile does not exists");
+        }
+        if(!user.getUsername().equals(username)){
+            throw new GeneralException("Session invalid");
+        }
+
+        if (!encoder.matches(passwordChangeRequest.getCurrentPassword(), user.getPassword())){
+            System.out.println("User pwd: " + user.getPassword());
+            System.out.println("Curr pwd: " + passwordChangeRequest.getCurrentPassword());
+            response.setSuccess(false);
+            response.setMessage("Current password is wrong");
+            return response;
+        }
+        if (!passwordChangeRequest.getNewPassword().equals(passwordChangeRequest.getConfirmPassword())){
+            response.setSuccess(false);
+            response.setMessage("New and confirm passwords do not match");
+            return response;
+        }
+        user.setPassword(encoder.encode(passwordChangeRequest.getNewPassword()));
+        userService.save(user);
+        response.setSuccess(true);
+        response.setMessage("Password change successful");
+        return response;
+    }
 }

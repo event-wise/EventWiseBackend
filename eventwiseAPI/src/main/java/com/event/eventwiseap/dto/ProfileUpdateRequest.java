@@ -2,28 +2,24 @@ package com.event.eventwiseap.dto;
 
 import lombok.Getter;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 @Getter
 public class ProfileUpdateRequest {
     private Long id;
 
-    @NotNull
-    @NotEmpty
-    @Size(max = 50)
-    @Email
+    @NotBlank(message = "E-mail cannot be empty")
+    @Size(max = 50, message = "E-mail must contain less than 50 characters")
+    @Email(message = "Not a proper E-mail")
     private String email;
 
-    @NotEmpty
-    @NotNull
-    @Size(min = 5, max = 10)
+    @NotEmpty(message = "Displayed name cannot be empty")
+    @NotNull(message = "Displayed name cannot be null")
+    @Size(min = 5, max = 10, message = "Displayed name must contain 10 characters at most, 5 characters at least")
     private String displayedName;
 
-    @NotNull
-    @NotEmpty
-    @Size(max = 20)
+    @NotNull(message = "Location cannot be null")
+    @NotEmpty(message = "Location cannot be empty")
+    @Size(max = 20, message = "Location must contain 20 characters at most")
     private String location;
 }

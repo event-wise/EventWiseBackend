@@ -10,8 +10,8 @@ import javax.validation.constraints.Size;
 @Getter
 @Setter
 public class RegisterRequest {
-    @NotBlank
-    @Size(min = 5, max = 20)
+    @NotBlank(message = "Username cannot be empty")
+    @Size(min = 5, max = 20, message = "Username must contain 20 characters at most, 5 characters at least")
     private String username;
 
     @NotBlank(message = "E-mail cannot be empty")
@@ -19,15 +19,15 @@ public class RegisterRequest {
     @Email(message = "Not a proper E-mail")
     private String email;
 
-    @NotBlank
-    @Size(min = 5, max = 10)
+    @NotBlank(message = "Displayed name cannot be empty")
+    @Size(min = 5, max = 10, message = "Displayed name must contain 10 characters at most, 5 characters at least")
     private String displayedName;
 
-    @NotBlank
-    @Size(min = 5, max = 56)
+    @NotBlank(message = "Password cannot be empty")
+    @Size(min = 5, max = 56, message = "Password must contain 56 characters at most, 5 characters at least")
     private String password;
 
-    @NotBlank
-    @Size(max = 20)
+    @NotBlank(message = "Location cannot be empty")
+    @Size(max = 20, message = "Location must contain 20 characters at most")
     private String location;
 }

@@ -19,17 +19,17 @@ import javax.validation.constraints.Size;
 public class UserDTO {
     Long id;
 
-    @NotNull
-    @Size(max = 20, min = 5)
+    @NotNull(message = "Username cannot be null")
+    @Size(max = 20, min = 5, message = "Username must contain 20 characters at most, 5 characters at least")
     private String username;
 
-    @NotEmpty
-    @NotNull
-    @Size(min = 5, max = 10)
+    @NotEmpty(message = "Displayed name cannot be empty")
+    @NotNull(message = "Displayed name cannot be null")
+    @Size(min = 5, max = 10, message = "Displayed name must contain 10 characters at most, 5 characters at least")
     private String displayedName;
 
-    @NotNull
-    @NotEmpty
-    @Size(max = 20)
+    @NotNull(message = "Location cannot be null")
+    @NotEmpty(message = "Location cannot be empty")
+    @Size(max = 20, message = "Location must contain 20 characters at most")
     private String location;
 }
