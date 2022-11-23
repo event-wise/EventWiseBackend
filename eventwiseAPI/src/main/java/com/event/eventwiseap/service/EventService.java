@@ -18,6 +18,7 @@ public interface EventService {
     Set<Event> getEventsByGroupId(Long groupId);
     Event getEventById(Long id);
 
+
     // Delete
     Long delete(Long id);
 }

@@ -25,20 +25,23 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event save(Event event) {
         if(Objects.isNull(event)){
-            throw new ObjectIsNullException("Event object cannot be null");
+            throw new ObjectIsNullException("Event object cannot be null (save)");
         }
         return eventDAO.save(event);
     }
 
     @Override
     public Event getEventById(Long id) {
+        if(Objects.isNull(id)){
+            throw new ObjectIsNullException("Event ID cannot be null (event details)");
+        }
         return eventDAO.getEventById(id);
     }
 
     @Override
     public Long delete(Long id) {
         if(Objects.isNull(id)){
-            throw new ObjectIsNullException("Event ID cannot be null");
+            throw new ObjectIsNullException("Event ID cannot be null (delete)");
         }
         Event event = eventDAO.getEventById(id);
         Set<User> users = event.getAcceptedMembers();
@@ -52,7 +55,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public Set<Event> getEventsByOrganizerId(Long organizerId) {
         if(Objects.isNull(organizerId)){
-            throw new ObjectIsNullException("Organizer ID cannot be null");
+            throw new ObjectIsNullException("Organizer ID cannot be null (events by organizer)");
         }
 
         return eventDAO.getEventsByOrganizerId(organizerId);
@@ -61,7 +64,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public Set<Event> getEventsByGroupId(Long groupId) {
         if(Objects.isNull(groupId)){
-            throw new ObjectIsNullException("Group ID cannot be null");
+            throw new ObjectIsNullException("Group ID cannot be null (events by group)");
         }
 
         return eventDAO.getEventsByOrganizerId(groupId);
@@ -70,8 +73,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public Set<Event> getEventsByUser(User user) {
         if(Objects.isNull(user)){
-            throw new ObjectIsNullException("User cannot be null");
+            throw new ObjectIsNullException("User cannot be null (events by user)");
         }
         return eventDAO.getEventsByAcceptedMembersContaining(user);
     }
+
+
 }

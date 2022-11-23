@@ -26,8 +26,7 @@ public class UserServiceImpl implements UserService {
     private final EventService eventService;
 
     @Override
-    //@Transactional
-    public User create(User user){
+    public User save(User user){
         if (Objects.isNull(user)) {
             throw new ObjectIsNullException("At the creation of a user, object cannot be null");
         }
@@ -56,14 +55,6 @@ public class UserServiceImpl implements UserService {
             throw new ObjectIsNullException("Displayed name cannot be null");
         }
         return userDAO.findUserByDisplayedNameContaining(displayedName);
-    }
-
-    @Override
-    public User update(User updatedUser) {
-        if (Objects.isNull(updatedUser)) {
-            throw new ObjectIsNullException("At the creation of a user, object cannot be null");
-        }
-        return userDAO.save(updatedUser);
     }
 
     @Override

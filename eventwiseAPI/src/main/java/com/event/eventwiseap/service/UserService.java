@@ -6,8 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface UserService {
-    // Create
-    User create(User user);
+    // Create and update
+    @Transactional
+    User save(User user);
 
     // Read
     User getByUsername(String username);
@@ -17,8 +18,6 @@ public interface UserService {
     boolean existsByUsername(String username);
 
     // Update
-    @Transactional
-    User update(User updatedUser);
 
     // Remove
     @Transactional

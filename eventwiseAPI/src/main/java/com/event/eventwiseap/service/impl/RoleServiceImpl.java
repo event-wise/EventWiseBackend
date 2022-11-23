@@ -18,7 +18,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role findByName(RoleType name){
         if(Objects.isNull(name)){
-            throw new ObjectIsNullException("Cannot search a role with null name");
+            throw new ObjectIsNullException("Role type cannot be null (role by name)");
         }
         return roleDAO.findByName(name);
     }

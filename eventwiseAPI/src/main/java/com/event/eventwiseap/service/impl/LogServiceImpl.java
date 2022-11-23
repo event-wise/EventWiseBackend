@@ -17,7 +17,7 @@ public class LogServiceImpl implements LogService {
     @Override
     public Log save(Log log) {
         if(Objects.isNull(log)){
-            throw new ObjectIsNullException("Log object cannot be null");
+            throw new ObjectIsNullException("Log object cannot be null (save)");
         }
         return logDAO.save(log);
     }
