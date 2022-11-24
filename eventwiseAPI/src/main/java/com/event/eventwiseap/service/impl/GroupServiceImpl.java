@@ -62,7 +62,7 @@ public class GroupServiceImpl implements GroupService {
         if (Objects.isNull(id)) {
             throw new ObjectIsNullException("Group ID cannot be null (delete)");
         }
-        Set<Event> groupEvents = eventService.getEventsByGroupId(id);
+        List<Event> groupEvents = eventService.getEventsByGroupId(id);
         for(Event event: groupEvents)
             eventService.delete(event.getId());
 
