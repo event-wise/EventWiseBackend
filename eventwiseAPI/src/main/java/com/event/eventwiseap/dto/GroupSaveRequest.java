@@ -9,7 +9,9 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-public class GroupCreationRequest {
+public class GroupSaveRequest {
+    Long groupId; // For update
+
     @NotNull(message = "A group must have an owner")
     Long ownerId;
 

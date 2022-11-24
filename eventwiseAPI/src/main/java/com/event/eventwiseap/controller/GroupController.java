@@ -37,7 +37,7 @@ public class GroupController {
     }
 
     @PostMapping("/create-group")
-    public Response createGroup(@RequestBody @Valid GroupCreationRequest groupCreationRequest, HttpServletRequest req){
+    public Response createGroup(@RequestBody @Valid GroupSaveRequest groupCreationRequest, HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
         User user = userService.getById(groupCreationRequest.getOwnerId());
@@ -58,6 +58,34 @@ public class GroupController {
         group = groupService.save(group);
         response.setSuccess(true);
         response.setMessage(group.getGroupName() + " has been created successfully.");
+        return response;
+    }
+
+    @PostMapping("/update-group")
+    public Response updateGroup(@RequestBody @Valid GroupSaveRequest groupUpdateRequest, HttpServletRequest req){
+        final HttpSession session = req.getSession();
+        final String username = session.getAttribute(SESSION_USERNAME).toString();
+        User user = userService.getById(groupUpdateRequest.getOwnerId());
+        if(Objects.isNull(user)){
+            throw new GeneralException("This profile does not exists");
+        }
+        if(!user.getUsername().equals(username)){
+            throw new GeneralException("Session invalid");
+        }
+        if(Objects.isNull(groupUpdateRequest.getGroupId()))
+            throw new GeneralException("Group ID cannot be null while updating");
+        Group group = groupService.getById(groupUpdateRequest.getGroupId());
+        if(Objects.isNull(group)){
+            throw new GeneralException("This group does not exists");
+        }
+        group.setGroupName(groupUpdateRequest.getGroupName());
+        group.setLocation(groupUpdateRequest.getLocation());
+        group.setDescription(groupUpdateRequest.getDescription());
+        group = groupService.save(group);
+
+        response.setSuccess(true);
+        response.setMessage(String.format("The group (group name: %s, group id: %s) has been updated successfully",
+                group.getGroupName(),group.getId()));
         return response;
     }
 
@@ -119,4 +147,6 @@ public class GroupController {
                 group.getGroupName(), group.getLocation(), group.getDescription(),
                 members,eventsDTOs,logMessages);
     }
+
+
 }
