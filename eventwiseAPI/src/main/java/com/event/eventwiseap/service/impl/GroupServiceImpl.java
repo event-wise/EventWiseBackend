@@ -40,6 +40,14 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    public Set<Group> getGroupsByMember(User user) {
+        if (Objects.isNull(user)) {
+            throw new ObjectIsNullException("User cannot be null (group by owner)");
+        }
+        return groupDAO.getGroupsByGroupMembersContaining(user);
+    }
+
+    @Override
     public Group save(Group group) {
         if (Objects.isNull(group)) {
             throw new ObjectIsNullException("Group cannot be null (save)");

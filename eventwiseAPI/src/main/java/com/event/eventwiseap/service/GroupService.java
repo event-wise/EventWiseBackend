@@ -13,6 +13,7 @@ public interface GroupService {
     // Read
     Group getById(Long id);
     List<Group> getGroupsByOwner(User user);
+    Set<Group> getGroupsByMember(User user);
 
     // Update
 
