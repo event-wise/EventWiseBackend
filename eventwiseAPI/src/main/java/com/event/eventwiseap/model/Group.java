@@ -59,6 +59,7 @@ public class Group extends BaseEntity {
     public boolean removeMember(User member){
         boolean memberRemoved = this.groupMembers.remove(member);
         boolean groupRemoved = member.removeGroup(this);
+        if(this.isOwner(member)) assignOwner();
         return memberRemoved && groupRemoved;
     }
 
