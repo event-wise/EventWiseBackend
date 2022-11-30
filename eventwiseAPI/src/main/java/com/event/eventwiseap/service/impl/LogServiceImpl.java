@@ -7,6 +7,7 @@ import com.event.eventwiseap.service.LogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -20,5 +21,13 @@ public class LogServiceImpl implements LogService {
             throw new ObjectIsNullException("Log object cannot be null (save)");
         }
         return logDAO.save(log);
+    }
+
+    @Override
+    public List<Log> getAllByGroupId(Long groupId) {
+        if(Objects.isNull(groupId)){
+            throw new ObjectIsNullException("Group ID cannot be null (save)");
+        }
+        return logDAO.getAllByGroupId(groupId);
     }
 }

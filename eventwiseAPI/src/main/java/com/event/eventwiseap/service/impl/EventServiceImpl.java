@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -62,12 +63,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Set<Event> getEventsByGroupId(Long groupId) {
+    public List<Event> getEventsByGroupId(Long groupId) {
         if(Objects.isNull(groupId)){
             throw new ObjectIsNullException("Group ID cannot be null (events by group)");
         }
 
-        return eventDAO.getEventsByOrganizerId(groupId);
+        return eventDAO.getEventsByGroupId(groupId);
     }
 
     @Override

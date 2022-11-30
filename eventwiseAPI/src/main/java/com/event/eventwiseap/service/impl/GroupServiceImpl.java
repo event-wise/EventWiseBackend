@@ -40,6 +40,14 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    public Set<Group> getGroupsByMember(User user) {
+        if (Objects.isNull(user)) {
+            throw new ObjectIsNullException("User cannot be null (group by owner)");
+        }
+        return groupDAO.getGroupsByGroupMembersContaining(user);
+    }
+
+    @Override
     public Group save(Group group) {
         if (Objects.isNull(group)) {
             throw new ObjectIsNullException("Group cannot be null (save)");
@@ -54,7 +62,7 @@ public class GroupServiceImpl implements GroupService {
         if (Objects.isNull(id)) {
             throw new ObjectIsNullException("Group ID cannot be null (delete)");
         }
-        Set<Event> groupEvents = eventService.getEventsByGroupId(id);
+        List<Event> groupEvents = eventService.getEventsByGroupId(id);
         for(Event event: groupEvents)
             eventService.delete(event.getId());
 

@@ -29,6 +29,15 @@ public class Group extends BaseEntity {
     @Size(max = 20, min = 1)
     private String groupName;
 
+    @NotNull
+    @NotEmpty
+    @Size(max = 20)
+    private String location;
+
+    @NotNull
+    @Size(max = 500)
+    private String description;
+
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
@@ -50,6 +59,7 @@ public class Group extends BaseEntity {
     public boolean removeMember(User member){
         boolean memberRemoved = this.groupMembers.remove(member);
         boolean groupRemoved = member.removeGroup(this);
+        if(this.isOwner(member)) assignOwner();
         return memberRemoved && groupRemoved;
     }
 

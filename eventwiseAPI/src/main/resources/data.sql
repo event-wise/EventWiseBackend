@@ -1,2 +1,18 @@
 insert into role(name) values ('ROLE_ADMIN');
 insert into role(name) values ('ROLE_USER');
+insert into "user"(displayed_name, email, location, password, username) values ('ADMIN1','balik18@itu.edu.tr','ISTANBUL', '$2a$10$o5H6Q1HY7W8KHQOtqDP7NOeR4rhn2bcq1Ys0XUeK3cfEVxOhFcRvy','balik18');
+insert into user_roles(user_id, roles_id) values (1,1);
+insert into user_roles(user_id, roles_id) values (1,2);
+insert into "user"(displayed_name, email, location, password, username) values ('ADMIN2','kocak18@itu.edu.tr','ISTANBUL', '$2a$10$o5H6Q1HY7W8KHQOtqDP7NOeR4rhn2bcq1Ys0XUeK3cfEVxOhFcRvy','kocak18');
+insert into user_roles(user_id, roles_id) values (2,1);
+insert into user_roles(user_id, roles_id) values (2,2);
+insert into "user"(displayed_name, email, location, password, username) values ('ADMIN3','kamburoglu19@itu.edu.tr','ISTANBUL', '$2a$10$o5H6Q1HY7W8KHQOtqDP7NOeR4rhn2bcq1Ys0XUeK3cfEVxOhFcRvy','kamburoglu19');
+insert into user_roles(user_id, roles_id) values (3,1);
+insert into user_roles(user_id, roles_id) values (3,2);
+insert into "user"(displayed_name, email, location, password, username) values ('ADMIN4','kavraz19@itu.edu.tr','ISTANBUL', '$2a$10$o5H6Q1HY7W8KHQOtqDP7NOeR4rhn2bcq1Ys0XUeK3cfEVxOhFcRvy','kavraz19');
+insert into user_roles(user_id, roles_id) values (4,1);
+insert into user_roles(user_id, roles_id) values (4,2);
+insert into "user"(displayed_name, email, location, password, username) values ('TESTER','test@test.com','ISTANBUL', '$2a$10$o5H6Q1HY7W8KHQOtqDP7NOeR4rhn2bcq1Ys0XUeK3cfEVxOhFcRvy','string');
+insert into user_roles(user_id, roles_id) values (5,2);
+insert into "user"(displayed_name, email, location, password, username) values ('TESTER','test1@test.com','ISTANBUL', '$2a$10$o5H6Q1HY7W8KHQOtqDP7NOeR4rhn2bcq1Ys0XUeK3cfEVxOhFcRvy','string1');
+insert into user_roles(user_id, roles_id) values (6,2);
