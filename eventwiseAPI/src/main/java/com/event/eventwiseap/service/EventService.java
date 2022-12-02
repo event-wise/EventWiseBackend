@@ -13,7 +13,7 @@ public interface EventService {
     Event save(Event event);
 
     // Read
-    Set<Event> getEventsByUser(User user);
+    List<Event> getEventsByUser(User user);
     Set<Event> getEventsByOrganizerId(Long organizerId);
     List<Event> getEventsByGroupId(Long groupId);
     Event getEventById(Long id);

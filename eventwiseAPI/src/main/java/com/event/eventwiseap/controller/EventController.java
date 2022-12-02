@@ -1,5 +1,6 @@
 package com.event.eventwiseap.controller;
 
+import com.event.eventwiseap.dto.EventDetailsDTO;
 import com.event.eventwiseap.dto.EventSaveRequest;
 import com.event.eventwiseap.dto.EventsDTO;
 import com.event.eventwiseap.dto.Response;
@@ -22,6 +23,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -78,8 +80,184 @@ public class EventController {
         response.setMessage(msg);
         return response;
     }
-//    @GetMapping("/list-user-events")
-//    public List<EventsDTO> listUserEvents(@RequestParam("userId") @NotEmpty @NotNull Long userId, HttpServletRequest req){
-//
-//    }
+
+    @PostMapping("/update-event")
+    public Response updateGroup(@RequestBody @Valid EventSaveRequest eventUpdateRequest, HttpServletRequest req){
+        final HttpSession session = req.getSession();
+        final String username = session.getAttribute(SESSION_USERNAME).toString();
+        User user = userService.getById(eventUpdateRequest.getOrganizerId());
+        if(Objects.isNull(user)){
+            throw new GeneralException("This profile does not exists");
+        }
+        if(!user.getUsername().equals(username)){
+            throw new GeneralException("Session invalid");
+        }
+        Group group = groupService.getById(eventUpdateRequest.getGroupId());
+        if(Objects.isNull(group)){
+            throw new GeneralException("This group does not exists");
+        }
+        Event event = eventService.getEventById(eventUpdateRequest.getEventId());
+        if(Objects.isNull(event))
+            throw new GeneralException("This event does not exists");
+        event.setName(eventUpdateRequest.getEventName());
+        event.setDateTime(eventUpdateRequest.getDateTime());
+        event.setLocation(eventUpdateRequest.getLocation());
+        event.setType(eventUpdateRequest.getType());
+        event.setDescription(eventUpdateRequest.getDescription());
+        event = eventService.save(event);
+        String msg = event.getName() + " updated by " + user.getUsername();
+        Log log = Log.builder().group(group).logMessage(msg).build();
+        logService.save(log);
+        response.setSuccess(true);
+        response.setMessage(msg);
+        return response;
+    }
+
+    @GetMapping("/list-user-events")
+    public List<EventsDTO> listUserEvents(@RequestParam("userId") @NotEmpty @NotNull Long userId, HttpServletRequest req){
+        final HttpSession session = req.getSession();
+        final String username = session.getAttribute(SESSION_USERNAME).toString();
+        User user = userService.getById(userId);
+        if(Objects.isNull(user)){
+            throw new GeneralException("This profile does not exists");
+        }
+        if(!user.getUsername().equals(username)){
+            throw new GeneralException("Session invalid");
+        }
+        List<Event> events = eventService.getEventsByUser(user);
+        List<EventsDTO> eventsDTO = new ArrayList<>();
+        for(Event event:events)
+            eventsDTO.add(new EventsDTO(event.getId(), event.getName(), event.getDateTime()));
+        return eventsDTO;
+    }
+
+    @GetMapping("/event-details")
+    public EventDetailsDTO getEventDetails(@RequestParam("userId") @NotEmpty @NotNull Long userId,
+                                           @RequestParam("eventId") @NotEmpty @NotNull Long eventId,
+                                           HttpServletRequest req){
+        final HttpSession session = req.getSession();
+        final String username = session.getAttribute(SESSION_USERNAME).toString();
+        User user = userService.getById(userId);
+        if(Objects.isNull(user)){
+            throw new GeneralException("This profile does not exists");
+        }
+        if(!user.getUsername().equals(username)){
+            throw new GeneralException("Session invalid");
+        }
+        Event event = eventService.getEventById(eventId);
+        if(Objects.isNull(event)){
+            throw new GeneralException("This event does not exists");
+        }
+        if(!event.getGroup().getGroupMembers().contains(user))
+            throw new GeneralException("You are not a member of this group");
+
+        List<String> acceptedMembers = new ArrayList<>();
+
+        for(User member: event.getGroup().getGroupMembers())
+            acceptedMembers.add(member.getUsername());
+        return new EventDetailsDTO(
+                eventId,
+                event.getGroup().getId(),
+                event.getOrganizer().getId(),
+                event.getName(),
+                event.getDateTime(),
+                event.getLocation(),
+                event.getType(),
+                event.getDescription(),
+                acceptedMembers,
+                event.isAccepted(user)
+        );
+    }
+
+    @DeleteMapping("/delete-event")
+    public Response deleteEvent(@RequestParam("userId") @NotEmpty @NotNull Long userId,
+                                @RequestParam("eventId") @NotEmpty @NotNull Long eventId,
+                                HttpServletRequest req){
+        final HttpSession session = req.getSession();
+        final String username = session.getAttribute(SESSION_USERNAME).toString();
+        User user = userService.getById(userId);
+        if(Objects.isNull(user)){
+            throw new GeneralException("This profile does not exists");
+        }
+        if(!user.getUsername().equals(username)){
+            throw new GeneralException("Session invalid");
+        }
+        Event event = eventService.getEventById(eventId);
+        if(Objects.isNull(event)){
+            throw new GeneralException("This event does not exists");
+        }
+        if(!event.getOrganizer().equals(user) || !event.getGroup().isOwner(user))
+            throw new GeneralException("Only the organizer or the group owner can delete the event");
+        String msg = event.getName() + " delete by " + user.getUsername();
+        eventService.delete(eventId);
+        Log log = Log.builder().group(event.getGroup()).logMessage(msg).build();
+        logService.save(log);
+        response.setSuccess(true);
+        response.setMessage(msg);
+        return response;
+    }
+
+    @PutMapping("/accept-event")
+    public Response acceptEvent(@RequestParam("userId") @NotEmpty @NotNull Long userId,
+                                @RequestParam("eventId") @NotEmpty @NotNull Long eventId,
+                                HttpServletRequest req){
+        final HttpSession session = req.getSession();
+        final String username = session.getAttribute(SESSION_USERNAME).toString();
+        User user = userService.getById(userId);
+        if(Objects.isNull(user)){
+            throw new GeneralException("This profile does not exists");
+        }
+        if(!user.getUsername().equals(username)){
+            throw new GeneralException("Session invalid");
+        }
+        Event event = eventService.getEventById(eventId);
+        if(Objects.isNull(event)){
+            throw new GeneralException("This event does not exists");
+        }
+        if(event.isAccepted(user))
+            throw new GeneralException("This event has already been accepted");
+
+        event.acceptedBy(user);
+        eventService.save(event);
+        String msg = user.getUsername() + " accepted the event " + event.getName();
+        Log log = Log.builder().group(event.getGroup()).logMessage(
+                msg
+        ).build();
+        logService.save(log);
+        response.setSuccess(true);
+        response.setMessage(msg);
+        return response;
+    }
+
+    @PutMapping("/reject-event")
+    public Response rejecttEvent(@RequestParam("userId") @NotEmpty @NotNull Long userId,
+                                @RequestParam("eventId") @NotEmpty @NotNull Long eventId,
+                                HttpServletRequest req){
+        final HttpSession session = req.getSession();
+        final String username = session.getAttribute(SESSION_USERNAME).toString();
+        User user = userService.getById(userId);
+        if(Objects.isNull(user)){
+            throw new GeneralException("This profile does not exists");
+        }
+        if(!user.getUsername().equals(username)){
+            throw new GeneralException("Session invalid");
+        }
+        Event event = eventService.getEventById(eventId);
+        if(Objects.isNull(event)){
+            throw new GeneralException("This event does not exists");
+        }
+        if(!event.isAccepted(user))
+            throw new GeneralException("This event has already been rejected or not accepted yet");
+
+        event.rejectedBy(user);
+        eventService.save(event);
+        String msg = user.getUsername() + " rejected the event " + event.getName();
+        Log log = Log.builder().group(event.getGroup()).logMessage(
+                msg
+        ).build();
+        logService.save(log);
+        response.setSuccess(true);
+        response.setMessage(msg);
+        return response;
+    }
 }
