@@ -12,9 +12,6 @@ import javax.validation.constraints.Size;
 public class GroupSaveRequest {
     Long groupId; // For update
 
-    @NotNull(message = "A group must have an owner")
-    Long ownerId;
-
     @NotNull(message = "Group name cannot be null")
     @NotEmpty(message = "Group name cannot be empty")
     @Size(max = 20, min = 1, message = "Group name must contain 20 characters at most")

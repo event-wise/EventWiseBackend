@@ -12,6 +12,7 @@ import com.event.eventwiseap.service.LogService;
 import com.event.eventwiseap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/group")
+@PreAuthorize("hasRole('ROLE_USER')")
 public class GroupController {
     private final GroupService groupService;
     private final UserService userService;
@@ -40,13 +42,7 @@ public class GroupController {
     public Response createGroup(@RequestBody @Valid GroupSaveRequest groupCreationRequest, HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(groupCreationRequest.getOwnerId());
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
+        User user = userService.getByUsername(username);
         Group group = Group.builder()
                 .groupName(groupCreationRequest.getGroupName())
                 .description(groupCreationRequest.getDescription())
@@ -65,19 +61,15 @@ public class GroupController {
     public Response updateGroup(@RequestBody @Valid GroupSaveRequest groupUpdateRequest, HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(groupUpdateRequest.getOwnerId());
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
+        User user = userService.getByUsername(username);
         if(Objects.isNull(groupUpdateRequest.getGroupId()))
             throw new GeneralException("Group ID cannot be null while updating");
         Group group = groupService.getById(groupUpdateRequest.getGroupId());
         if(Objects.isNull(group)){
             throw new GeneralException("This group does not exists");
         }
+        if(!group.isOwner(user))
+            throw new GeneralException("Only group owner can update the group");
         group.setGroupName(groupUpdateRequest.getGroupName());
         group.setLocation(groupUpdateRequest.getLocation());
         group.setDescription(groupUpdateRequest.getDescription());
@@ -90,16 +82,10 @@ public class GroupController {
     }
 
     @GetMapping("/list-user-groups")
-    public Set<GroupsDTO> listUserGroups(@RequestParam("userId") @NotEmpty @NotNull Long userId, HttpServletRequest req){
+    public Set<GroupsDTO> listUserGroups(HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(userId);
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
+        User user = userService.getByUsername(username);
         Set<Group> groups = groupService.getGroupsByMember(user);
         Set<GroupsDTO> groupsDTOs = new HashSet<>();
 
@@ -110,18 +96,11 @@ public class GroupController {
     }
 
     @GetMapping("/group-details")
-    public GroupDetailsDTO getGroupDetails(@RequestParam("userId") @NotEmpty @NotNull Long userId,
-                                    @RequestParam("groupId") @NotEmpty @NotNull Long groupId,
+    public GroupDetailsDTO getGroupDetails(@RequestParam("groupId") @NotEmpty @NotNull Long groupId,
                                     HttpServletRequest req) {
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(userId);
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
+        User user = userService.getByUsername(username);
         Group group = groupService.getById(groupId);
         if(Objects.isNull(group)){
             throw new GeneralException("This group does not exists");
@@ -149,18 +128,11 @@ public class GroupController {
     }
 
     @DeleteMapping("/delete-group")
-    public Response deleteGroup(@RequestParam("userId") @NotEmpty @NotNull Long userId,
-                                @RequestParam("groupId") @NotEmpty @NotNull Long groupId,
+    public Response deleteGroup(@RequestParam("groupId") @NotEmpty @NotNull Long groupId,
                                 HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(userId);
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
+        User user = userService.getByUsername(username);
         Group group = groupService.getById(groupId);
         if(Objects.isNull(group)){
             throw new GeneralException("This group does not exists");
@@ -176,19 +148,12 @@ public class GroupController {
     }
 
     @GetMapping("/search-member")
-    public SearchResponse searchMember(@RequestParam("userId") @NotEmpty @NotNull Long userId,
-                                @RequestParam("groupId") @NotEmpty @NotNull Long groupId,
+    public SearchResponse searchMember(@RequestParam("groupId") @NotEmpty @NotNull Long groupId,
                                 @RequestParam("search") @NotEmpty @NotNull String search,
                                 HttpServletRequest req) {
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(userId);
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
+        User user = userService.getByUsername(username);
         Group group = groupService.getById(groupId);
         if(Objects.isNull(group)){
             throw new GeneralException("This group does not exists");
@@ -201,10 +166,10 @@ public class GroupController {
         SearchResponse searchResponse;
         if(!Objects.isNull(searchedUser)){
             searchResponse = new
-                    SearchResponse(true, group.getGroupMembers().contains(searchedUser), searchedUser.getUsername());
+                    SearchResponse(true, group.getGroupMembers().contains(searchedUser), searchedUser.getId(),searchedUser.getUsername());
         }
         else{
-            searchResponse = new SearchResponse(false, false, "-");
+            searchResponse = new SearchResponse(false, false, 0L,"-");
         }
         return searchResponse;
     }
@@ -214,13 +179,7 @@ public class GroupController {
                                     HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(memberAddRemoveRequest.getActorUserId());
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
+        User user = userService.getByUsername(username);
         Group group = groupService.getById(memberAddRemoveRequest.getGroupId());
         if(Objects.isNull(group)){
             throw new GeneralException("This group does not exists");
@@ -257,18 +216,11 @@ public class GroupController {
     }
 
     @PutMapping("/exit-from-group")
-    public Response exitFromGroup(@RequestParam("userId") @NotEmpty @NotNull Long userId,
-                                  @RequestParam("groupId") @NotEmpty @NotNull Long groupId,
+    public Response exitFromGroup(@RequestParam("groupId") @NotEmpty @NotNull Long groupId,
                                   HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(userId);
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
+        User user = userService.getByUsername(username);
         Group group = groupService.getById(groupId);
         if(Objects.isNull(group)){
             throw new GeneralException("This group does not exists");

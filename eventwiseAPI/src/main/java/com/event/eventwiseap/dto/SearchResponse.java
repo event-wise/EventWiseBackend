@@ -12,5 +12,6 @@ import lombok.Setter;
 public class SearchResponse {
     boolean found;
     boolean isMember;
+    Long id;
     String username;
 }
