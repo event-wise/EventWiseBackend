@@ -72,7 +72,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Set<Event> getEventsByUser(User user) {
+    public List<Event> getEventsByUser(User user) {
         if(Objects.isNull(user)){
             throw new ObjectIsNullException("User cannot be null (events by user)");
         }

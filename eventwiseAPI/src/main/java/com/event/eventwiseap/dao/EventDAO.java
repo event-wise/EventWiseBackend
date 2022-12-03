@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface EventDAO extends JpaRepository<Event, Long> {
-    Set<Event> getEventsByAcceptedMembersContaining(User user);
+    List<Event> getEventsByAcceptedMembersContaining(User user);
 
     Event getEventById(Long id);
 
