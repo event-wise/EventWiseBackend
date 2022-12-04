@@ -1,6 +1,7 @@
 package com.event.eventwiseap.controller;
 
 import com.event.eventwiseap.dto.*;
+import com.event.eventwiseap.exception.FieldException;
 import com.event.eventwiseap.exception.GeneralException;
 import com.event.eventwiseap.exception.ObjectIsNullException;
 import com.event.eventwiseap.model.Role;
@@ -18,6 +19,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
@@ -27,10 +30,7 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -50,7 +50,17 @@ public class AccountController {
     }
 
     @PostMapping("/register")
-    public Response registerUser(@RequestBody @Valid RegisterRequest request) throws ConstraintViolationException {
+    public Response registerUser(@RequestBody @Valid RegisterRequest request, Errors errors) throws ConstraintViolationException {
+        if(errors.hasErrors())
+        {
+            List<String> fields = new ArrayList<>();
+            List<String> messages = new ArrayList<>();
+            for (FieldError fieldError: errors.getFieldErrors()){
+                fields.add(fieldError.getField());
+                messages.add(fieldError.getDefaultMessage());
+            }
+            throw new FieldException(null, fields,messages);
+        }
         if (userService.existsByUsername(request.getUsername())){
             response.setSuccess(false);
             response.setMessage("Username is already taken");
