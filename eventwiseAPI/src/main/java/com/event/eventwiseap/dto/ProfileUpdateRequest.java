@@ -6,12 +6,6 @@ import javax.validation.constraints.*;
 
 @Getter
 public class ProfileUpdateRequest {
-    private Long id;
-
-    @NotBlank(message = "E-mail cannot be empty")
-    @Size(max = 50, message = "E-mail must contain less than 50 characters")
-    @Email(message = "Not a proper E-mail")
-    private String email;
 
     @NotEmpty(message = "Displayed name cannot be empty")
     @NotNull(message = "Displayed name cannot be null")

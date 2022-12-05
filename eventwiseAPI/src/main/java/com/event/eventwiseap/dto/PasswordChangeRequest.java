@@ -9,7 +9,6 @@ import javax.validation.constraints.Size;
 @Getter
 @Setter
 public class PasswordChangeRequest {
-    private Long id;
 
     @NotBlank(message = "Current password cannot be empty")
     @Size(min = 5, max = 56, message = "Current password must contain 56 characters at most, 5 characters at least")

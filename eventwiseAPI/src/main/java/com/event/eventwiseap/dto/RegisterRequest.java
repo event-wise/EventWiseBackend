@@ -27,6 +27,10 @@ public class RegisterRequest {
     @Size(min = 5, max = 56, message = "Password must contain 56 characters at most, 5 characters at least")
     private String password;
 
+    @NotBlank(message = "Password cannot be empty")
+    @Size(min = 5, max = 56, message = "Confirmation password must contain 56 characters at most, 5 characters at least")
+    private String confirmPassword;
+
     @NotBlank(message = "Location cannot be empty")
     @Size(max = 20, message = "Location must contain 20 characters at most")
     private String location;

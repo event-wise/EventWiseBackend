@@ -19,9 +19,6 @@ public class EventSaveRequest {
     @NotNull(message = "The event must belong to a group")
     private Long groupId;
 
-    @NotNull(message = "The event must have an organizer")
-    private Long organizerId;
-
     @NotNull(message = "Event name cannot be null")
     @NotEmpty(message = "Event name cannot be empty")
     @Size(max = 50,message = "Event name must contain 50 characters at most")

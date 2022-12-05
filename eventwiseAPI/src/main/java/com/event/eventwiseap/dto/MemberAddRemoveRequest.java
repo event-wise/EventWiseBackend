@@ -10,9 +10,6 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberAddRemoveRequest {
-    @NotNull(message = "The action must have an actor")
-    Long actorUserId;
-
     @NotNull(message = "The action must have a subject")
     Long subjectUserId;
 

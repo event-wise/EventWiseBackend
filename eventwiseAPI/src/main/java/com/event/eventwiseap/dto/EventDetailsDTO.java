@@ -21,8 +21,8 @@ public class EventDetailsDTO {
     @NotNull(message = "The event must belong to a group")
     private Long groupId;
 
-    @NotNull(message = "The event must have an organizer")
-    private Long organizerId;
+    @NotNull(message = "Organizer indicator cannot be null")
+    private boolean organizer;
 
     @NotNull(message = "Event name cannot be null")
     @NotEmpty(message = "Event name cannot be empty")

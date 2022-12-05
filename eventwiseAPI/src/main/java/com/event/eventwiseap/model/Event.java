@@ -80,6 +80,8 @@ public class Event extends BaseEntity{
         return userAccepted && eventAccepted;
     }
 
+    public boolean isOrganizer(User user) { return this.organizer.equals(user);}
+
 
     public boolean isAccepted(User user){
         return this.acceptedMembers.contains(user);

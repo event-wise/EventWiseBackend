@@ -1,6 +1,7 @@
 package com.event.eventwiseap.controller;
 
 import com.event.eventwiseap.dto.*;
+import com.event.eventwiseap.exception.FieldException;
 import com.event.eventwiseap.exception.GeneralException;
 import com.event.eventwiseap.exception.ObjectIsNullException;
 import com.event.eventwiseap.model.Role;
@@ -12,23 +13,24 @@ import com.event.eventwiseap.service.RoleService;
 import com.event.eventwiseap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,7 +50,17 @@ public class AccountController {
     }
 
     @PostMapping("/register")
-    public Response registerUser(@RequestBody @Valid RegisterRequest request) throws ConstraintViolationException {
+    public Response registerUser(@RequestBody @Valid RegisterRequest request, Errors errors) throws ConstraintViolationException {
+        if(errors.hasErrors())
+        {
+            List<String> fields = new ArrayList<>();
+            List<String> messages = new ArrayList<>();
+            for (FieldError fieldError: errors.getFieldErrors()){
+                fields.add(fieldError.getField());
+                messages.add(fieldError.getDefaultMessage());
+            }
+            throw new FieldException(null, fields,messages);
+        }
         if (userService.existsByUsername(request.getUsername())){
             response.setSuccess(false);
             response.setMessage("Username is already taken");
@@ -59,6 +71,12 @@ public class AccountController {
             response.setMessage("Email is already in use");
             return response;
         }
+        if (!request.getPassword().equals(request.getConfirmPassword())){
+            response.setSuccess(false);
+            response.setMessage("New and confirm passwords do not match");
+            return response;
+        }
+
         User user = User.builder()
                         .username(request.getUsername())
                         .email(request.getEmail())
@@ -101,15 +119,25 @@ public class AccountController {
     }
 
     @GetMapping("/logout")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public Response logout(HttpServletRequest req){
-        HttpSession session = req.getSession();
+        HttpSession session = req.getSession(false);
+        String user = session.getAttribute(SESSION_USERNAME).toString();
+        SecurityContextHolder.clearContext();
+        session = req.getSession(false);
+        if(session != null){
+            session.invalidate();
+        }
+        for(Cookie cookie : req.getCookies()) {
+            cookie.setMaxAge(0);
+        }
         response.setSuccess(true);
-        response.setMessage(String.format("%s - logged out", session.getAttribute(SESSION_USERNAME).toString()));
-        session.invalidate();
+        response.setMessage(String.format("%s - logged out", user));
         return response;
     }
 
     @DeleteMapping("/delete-account")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public Response deleteAccount(HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
@@ -130,32 +158,21 @@ public class AccountController {
     }
 
     @GetMapping("/profile")
-    public UserDTO profile(@RequestParam("id") @NotEmpty @NotNull Long id, HttpServletRequest req){
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public UserDTO profile(HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(id);
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
+        User user = userService.getByUsername(username);
         return UserDTO.builder().id(user.getId()).username(user.getUsername()).displayedName(user.getDisplayedName())
                 .location(user.getLocation()).build();
     }
 
     @PostMapping("/update-profile")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public Response updateProfile(@RequestBody @Valid ProfileUpdateRequest profileUpdateRequest, HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(profileUpdateRequest.getId());
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
-        user.setEmail(profileUpdateRequest.getEmail());
+        User user = userService.getByUsername(username);
         user.setDisplayedName(profileUpdateRequest.getDisplayedName());
         user.setLocation(profileUpdateRequest.getLocation());
         userService.save(user);
@@ -165,17 +182,11 @@ public class AccountController {
     }
 
     @PostMapping("/change-password")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public Response changePassword(@RequestBody @Valid PasswordChangeRequest passwordChangeRequest, HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        User user = userService.getById(passwordChangeRequest.getId());
-        if(Objects.isNull(user)){
-            throw new GeneralException("This profile does not exists");
-        }
-        if(!user.getUsername().equals(username)){
-            throw new GeneralException("Session invalid");
-        }
-
+        User user = userService.getByUsername(username);
         if (!encoder.matches(passwordChangeRequest.getCurrentPassword(), user.getPassword())){
             System.out.println("User pwd: " + user.getPassword());
             System.out.println("Curr pwd: " + passwordChangeRequest.getCurrentPassword());
