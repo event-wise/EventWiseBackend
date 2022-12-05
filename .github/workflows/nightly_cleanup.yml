@@ -1,7 +1,6 @@
 name: 'nightly artifacts cleanup'
-on:
-  schedule:
-    - cron: '0 0 * * *' # every night at midnight
+on: 
+  push
 jobs:
   delete-artifacts:
     runs-on: ubuntu-latest
