@@ -71,6 +71,12 @@ public class AccountController {
             response.setMessage("Email is already in use");
             return response;
         }
+        if (!request.getPassword().equals(request.getConfirmPassword())){
+            response.setSuccess(false);
+            response.setMessage("New and confirm passwords do not match");
+            return response;
+        }
+
         User user = User.builder()
                         .username(request.getUsername())
                         .email(request.getEmail())

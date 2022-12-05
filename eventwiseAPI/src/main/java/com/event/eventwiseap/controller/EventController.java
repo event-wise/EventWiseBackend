@@ -139,7 +139,7 @@ public class EventController {
         return new EventDetailsDTO(
                 eventId,
                 event.getGroup().getId(),
-                event.getOrganizer().getId(),
+                event.isOrganizer(user),
                 event.getName(),
                 event.getDateTime(),
                 event.getLocation(),

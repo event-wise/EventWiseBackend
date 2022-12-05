@@ -122,7 +122,7 @@ public class GroupController {
         for(User member:group.getGroupMembers())
             members.add(member.getUsername());
 
-        return new GroupDetailsDTO(group.getId(),
+        return new GroupDetailsDTO(group.getId(), group.isOwner(user),
                 group.getGroupName(), group.getLocation(), group.getDescription(),
                 members,eventsDTOs,logMessages);
     }
