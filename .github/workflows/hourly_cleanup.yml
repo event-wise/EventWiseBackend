@@ -1,6 +1,7 @@
-name: 'nightly artifacts cleanup'
+name: 'hourly artifacts cleanup'
 on: 
-  push
+  schedule:
+    - cron: '0 * * * *' # every hour
 jobs:
   delete-artifacts:
     runs-on: ubuntu-latest
@@ -8,4 +9,4 @@ jobs:
       - uses: kolpav/purge-artifacts-action@v1
         with:
           token: ${{secrets.GITHUB_TOKEN}}
-          expire-in: 1days 
+          expire-in: 2hr 
