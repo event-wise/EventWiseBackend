@@ -22,6 +22,21 @@ public class GroupServiceImpl implements GroupService {
 
     private final EventService eventService;
 
+    @Override
+    public void removeMember(Group group, User user) {
+        if (Objects.isNull(user)) {
+            throw new ObjectIsNullException("User cannot be null (group details)");
+        }
+        if (Objects.isNull(group)) {
+            throw new ObjectIsNullException("Group cannot be null (group details)");
+        }
+        group.removeMember(user);
+        if(group.isEmpty()){
+            delete(group.getId());
+            return;
+        }
+        groupDAO.save(group);
+    }
 
     @Override
     public Group getById(Long id) {

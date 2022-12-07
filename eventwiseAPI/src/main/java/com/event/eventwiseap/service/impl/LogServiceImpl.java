@@ -28,6 +28,6 @@ public class LogServiceImpl implements LogService {
         if(Objects.isNull(groupId)){
             throw new ObjectIsNullException("Group ID cannot be null (save)");
         }
-        return logDAO.getAllByGroupId(groupId);
+        return logDAO.getAllByGroupIdOrderByIdDesc(groupId);
     }
 }

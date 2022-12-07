@@ -229,8 +229,8 @@ public class GroupController {
             throw new GeneralException("You are not a member of this group");
         }
 
-        response.setSuccess(group.removeMember(user));
-        groupService.save(group);
+        groupService.removeMember(group,user);
+        response.setSuccess(true);
         response.setMessage("You left the group '" + group.getGroupName() + "'");
 
         return response;

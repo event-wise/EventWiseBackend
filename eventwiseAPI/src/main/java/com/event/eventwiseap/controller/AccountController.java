@@ -49,8 +49,7 @@ public class AccountController {
         response = new Response();
     }
 
-    @PostMapping("/register")
-    public Response registerUser(@RequestBody @Valid RegisterRequest request, Errors errors) throws ConstraintViolationException {
+    private void fieldErrorChecker(Errors errors) throws FieldException{
         if(errors.hasErrors())
         {
             List<String> fields = new ArrayList<>();
@@ -61,6 +60,10 @@ public class AccountController {
             }
             throw new FieldException(null, fields,messages);
         }
+    }
+    @PostMapping("/register")
+    public Response registerUser(@RequestBody @Valid RegisterRequest request, Errors errors) throws ConstraintViolationException {
+        fieldErrorChecker(errors);
         if (userService.existsByUsername(request.getUsername())){
             response.setSuccess(false);
             response.setMessage("Username is already taken");
@@ -97,7 +100,8 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public JWTResponse authenticateUser(@RequestBody @Valid LoginRequest loginRequest){
+    public JWTResponse authenticateUser(@RequestBody @Valid LoginRequest loginRequest, Errors errors){
+        fieldErrorChecker(errors);
         Authentication authentication =
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
                         loginRequest.getPassword()));
