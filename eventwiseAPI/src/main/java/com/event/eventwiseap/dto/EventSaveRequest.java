@@ -1,6 +1,7 @@
 package com.event.eventwiseap.dto;
 
-import jdk.jfr.Timestamp;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,7 @@
 package com.event.eventwiseap.controller;
 
 import com.event.eventwiseap.dto.*;
+import com.event.eventwiseap.exception.FieldException;
 import com.event.eventwiseap.exception.GeneralException;
 import com.event.eventwiseap.model.Event;
 import com.event.eventwiseap.model.Group;
@@ -13,6 +14,8 @@ import com.event.eventwiseap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,9 +40,20 @@ public class GroupController {
     static {
         response = new Response();
     }
-
+    private void fieldErrorChecker(Errors errors) throws FieldException {
+        if(errors.hasErrors())
+        {
+            List<String> messages = new ArrayList<>();
+            for (FieldError fieldError: errors.getFieldErrors()){
+                messages.add(fieldError.getDefaultMessage());
+            }
+            throw new FieldException(null, messages);
+        }
+    }
     @PostMapping("/create-group")
-    public Response createGroup(@RequestBody @Valid GroupSaveRequest groupCreationRequest, HttpServletRequest req){
+    public Response createGroup(@RequestBody @Valid GroupSaveRequest groupCreationRequest, Errors errors,
+                                HttpServletRequest req){
+        fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
         User user = userService.getByUsername(username);
@@ -58,7 +72,9 @@ public class GroupController {
     }
 
     @PostMapping("/update-group")
-    public Response updateGroup(@RequestBody @Valid GroupSaveRequest groupUpdateRequest, HttpServletRequest req){
+    public Response updateGroup(@RequestBody @Valid GroupSaveRequest groupUpdateRequest, Errors errors,
+                                HttpServletRequest req){
+        fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
         User user = userService.getByUsername(username);
@@ -175,8 +191,9 @@ public class GroupController {
     }
 
     @PostMapping("/add-remove-member")
-    public Response addRemoveMember(@RequestBody @Valid MemberAddRemoveRequest memberAddRemoveRequest,
+    public Response addRemoveMember(@RequestBody @Valid MemberAddRemoveRequest memberAddRemoveRequest, Errors errors,
                                     HttpServletRequest req){
+        fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
         User user = userService.getByUsername(username);
@@ -229,8 +246,8 @@ public class GroupController {
             throw new GeneralException("You are not a member of this group");
         }
 
-        response.setSuccess(group.removeMember(user));
-        groupService.save(group);
+        groupService.removeMember(group,user);
+        response.setSuccess(true);
         response.setMessage("You left the group '" + group.getGroupName() + "'");
 
         return response;

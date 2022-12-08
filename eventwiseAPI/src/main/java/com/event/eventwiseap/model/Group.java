@@ -71,8 +71,10 @@ public class Group extends BaseEntity {
         return this.owner.getId().equals(member.getId());
     }
     public void assignOwner(){
-        Iterator<User> it = this.groupMembers.iterator();
-        this.owner = it.next();
+        if(!this.isEmpty()){
+            Iterator<User> it = this.groupMembers.iterator();
+            this.owner = it.next();
+        }
     }
 
 

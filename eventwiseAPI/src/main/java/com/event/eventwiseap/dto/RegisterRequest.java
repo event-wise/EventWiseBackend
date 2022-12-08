@@ -1,7 +1,9 @@
 package com.event.eventwiseap.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -9,6 +11,8 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
+@SuperBuilder
+@AllArgsConstructor
 public class RegisterRequest {
     @NotBlank(message = "Username cannot be empty")
     @Size(min = 5, max = 20, message = "Username must contain 20 characters at most, 5 characters at least")

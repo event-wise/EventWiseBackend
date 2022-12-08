@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface LogDAO extends JpaRepository<Log, Long> {
-    List<Log> getAllByGroupId(Long id);
+    List<Log> getAllByGroupIdOrderByIdDesc(Long id);
 }

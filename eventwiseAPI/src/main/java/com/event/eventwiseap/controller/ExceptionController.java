@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 @ResponseBody
 public class ExceptionController {
     @ExceptionHandler(GeneralException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handle(HttpServletRequest req, GeneralException ex){
         return new ErrorResponse(req.getRequestURI(), ex.getMessage());
     }

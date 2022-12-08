@@ -9,6 +9,7 @@ import java.util.Set;
 public interface GroupService {
     // Create and update
     Group save(Group group);
+    void removeMember(Group group, User user);
 
     // Read
     Group getById(Long id);
