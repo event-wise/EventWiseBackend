@@ -16,6 +16,7 @@ public interface UserService {
     List<User> searchByDisplayedName(String displayedName);
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
+    List<User> getAllUsers();
 
     // Update
 
