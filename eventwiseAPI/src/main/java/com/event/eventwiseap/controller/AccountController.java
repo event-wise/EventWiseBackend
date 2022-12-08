@@ -11,6 +11,8 @@ import com.event.eventwiseap.security.JWTUtils;
 import com.event.eventwiseap.security.UserDetailsImpl;
 import com.event.eventwiseap.service.RoleService;
 import com.event.eventwiseap.service.UserService;
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -52,34 +55,25 @@ public class AccountController {
     private void fieldErrorChecker(Errors errors) throws FieldException{
         if(errors.hasErrors())
         {
-            List<String> fields = new ArrayList<>();
             List<String> messages = new ArrayList<>();
             for (FieldError fieldError: errors.getFieldErrors()){
-                fields.add(fieldError.getField());
                 messages.add(fieldError.getDefaultMessage());
             }
-            throw new FieldException(null, fields,messages);
+            throw new FieldException(null, messages);
         }
     }
     @PostMapping("/register")
     public Response registerUser(@RequestBody @Valid RegisterRequest request, Errors errors) throws ConstraintViolationException {
         fieldErrorChecker(errors);
-        if (userService.existsByUsername(request.getUsername())){
-            response.setSuccess(false);
-            response.setMessage("Username is already taken");
-            return response;
-        }
-        if (userService.existsByEmail(request.getEmail())){
-            response.setSuccess(false);
-            response.setMessage("Email is already in use");
-            return response;
-        }
-        if (!request.getPassword().equals(request.getConfirmPassword())){
-            response.setSuccess(false);
-            response.setMessage("New and confirm passwords do not match");
-            return response;
-        }
-
+        List<String> messages = new ArrayList<>();
+        if (userService.existsByUsername(request.getUsername()))
+            messages.add("Username is already taken");
+        if (userService.existsByEmail(request.getEmail()))
+            messages.add("Email is already in use");
+        if (!request.getPassword().equals(request.getConfirmPassword()))
+            messages.add("New and confirm passwords do not match");
+        if(!messages.isEmpty())
+            throw new FieldException(null, messages);
         User user = User.builder()
                         .username(request.getUsername())
                         .email(request.getEmail())
@@ -173,7 +167,9 @@ public class AccountController {
 
     @PostMapping("/update-profile")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public Response updateProfile(@RequestBody @Valid ProfileUpdateRequest profileUpdateRequest, HttpServletRequest req){
+    public Response updateProfile(@RequestBody @Valid ProfileUpdateRequest profileUpdateRequest, Errors errors,
+                                  HttpServletRequest req){
+        fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
         User user = userService.getByUsername(username);
@@ -187,22 +183,20 @@ public class AccountController {
 
     @PostMapping("/change-password")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public Response changePassword(@RequestBody @Valid PasswordChangeRequest passwordChangeRequest, HttpServletRequest req){
+    public Response changePassword(@RequestBody @Valid PasswordChangeRequest passwordChangeRequest,Errors errors,
+                                   HttpServletRequest req){
+        fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
         User user = userService.getByUsername(username);
-        if (!encoder.matches(passwordChangeRequest.getCurrentPassword(), user.getPassword())){
-            System.out.println("User pwd: " + user.getPassword());
-            System.out.println("Curr pwd: " + passwordChangeRequest.getCurrentPassword());
-            response.setSuccess(false);
-            response.setMessage("Current password is wrong");
-            return response;
-        }
-        if (!passwordChangeRequest.getNewPassword().equals(passwordChangeRequest.getConfirmPassword())){
-            response.setSuccess(false);
-            response.setMessage("New and confirm passwords do not match");
-            return response;
-        }
+        List<String> messages = new ArrayList<>();
+        if (!encoder.matches(passwordChangeRequest.getCurrentPassword(), user.getPassword()))
+            messages.add("Current password is wrong");
+        if (!passwordChangeRequest.getNewPassword().equals(passwordChangeRequest.getConfirmPassword()))
+            messages.add("New and confirm passwords do not match");
+        if(!messages.isEmpty())
+            throw new FieldException(null, messages);
+
         user.setPassword(encoder.encode(passwordChangeRequest.getNewPassword()));
         userService.save(user);
         response.setSuccess(true);

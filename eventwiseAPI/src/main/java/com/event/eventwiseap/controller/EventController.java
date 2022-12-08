@@ -4,6 +4,7 @@ import com.event.eventwiseap.dto.EventDetailsDTO;
 import com.event.eventwiseap.dto.EventSaveRequest;
 import com.event.eventwiseap.dto.EventsDTO;
 import com.event.eventwiseap.dto.Response;
+import com.event.eventwiseap.exception.FieldException;
 import com.event.eventwiseap.exception.GeneralException;
 import com.event.eventwiseap.model.Event;
 import com.event.eventwiseap.model.Group;
@@ -16,6 +17,8 @@ import com.event.eventwiseap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -44,9 +47,20 @@ public class EventController {
     static {
         response = new Response();
     }
-
+    private void fieldErrorChecker(Errors errors) throws FieldException {
+        if(errors.hasErrors())
+        {
+            List<String> messages = new ArrayList<>();
+            for (FieldError fieldError: errors.getFieldErrors()){
+                messages.add(fieldError.getDefaultMessage());
+            }
+            throw new FieldException(null, messages);
+        }
+    }
     @PostMapping("/create-event")
-    public Response createEvent(@RequestBody @Valid EventSaveRequest eventCreationRequest, HttpServletRequest req){
+    public Response createEvent(@RequestBody @Valid EventSaveRequest eventCreationRequest, Errors errors,
+                                HttpServletRequest req){
+        fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
         User user = userService.getByUsername(username);
@@ -78,7 +92,9 @@ public class EventController {
     }
 
     @PostMapping("/update-event")
-    public Response updateGroup(@RequestBody @Valid EventSaveRequest eventUpdateRequest, HttpServletRequest req){
+    public Response updateGroup(@RequestBody @Valid EventSaveRequest eventUpdateRequest, Errors errors,
+                                HttpServletRequest req){
+        fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
         User user = userService.getByUsername(username);

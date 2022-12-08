@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 public class FieldException extends RuntimeException{
     private String path;
-    private List<String> fields;
     private List<String> messages;
 
     @JsonIgnore
