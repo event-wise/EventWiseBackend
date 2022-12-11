@@ -109,5 +109,12 @@ public class GroupServiceImpl implements GroupService {
         }
         return groupDAO.existsByGroupName(groupName);
     }
+    @Override
+    public boolean existsByGroupId(Long id) {
+        if (Objects.isNull(id)) {
+            throw new ObjectIsNullException("Search param cannot be null");
+        }
+        return groupDAO.existsById(id);
+    }
 
 }

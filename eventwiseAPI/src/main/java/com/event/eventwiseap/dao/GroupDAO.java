@@ -26,4 +26,6 @@ public interface GroupDAO extends JpaRepository<Group, Long> {
 
     boolean existsByGroupName(String groupName);
 
+    boolean existsById(Long id);
+
 }

@@ -23,5 +23,5 @@ public interface GroupService {
     // Delete
     Long delete(Long id);
     Long deleteByOwner(User user);
-
+    boolean existsByGroupId(Long id);
 }

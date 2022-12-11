@@ -1,19 +1,16 @@
 package com.event.eventwiseap.controller;
 
+import com.event.eventwiseap.dto.EventSaveRequest;
 import com.event.eventwiseap.dto.GroupSaveRequest;
 import com.event.eventwiseap.dto.Response;
 import com.event.eventwiseap.dto.UserDTO;
 import com.event.eventwiseap.dto.admin.*;
 import com.event.eventwiseap.exception.FieldException;
+import com.event.eventwiseap.exception.GeneralException;
 import com.event.eventwiseap.exception.ObjectIsNullException;
-import com.event.eventwiseap.model.Group;
-import com.event.eventwiseap.model.Role;
-import com.event.eventwiseap.model.RoleType;
-import com.event.eventwiseap.model.User;
+import com.event.eventwiseap.model.*;
 import com.event.eventwiseap.security.JWTUtils;
-import com.event.eventwiseap.service.GroupService;
-import com.event.eventwiseap.service.RoleService;
-import com.event.eventwiseap.service.UserService;
+import com.event.eventwiseap.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,9 +21,11 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -41,6 +40,8 @@ public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
     private final GroupService groupService;
+    private final EventService eventService;
+    private final LogService logService;
     private static final String SESSION_USERNAME = "username";
     private static Response response;
     static {
@@ -222,5 +223,93 @@ public class AdminController {
 
         return response;
     }
+
+    @GetMapping("/get-all-events")
+    public List<AdminEventsDTO> getAllEvents(HttpServletRequest req){
+        List<Event> events = eventService.getAllEvents();
+        List<AdminEventsDTO> adminEventsDTOS = new ArrayList<>();
+        for(Event event: events){
+            Group belongedGroup = event.getGroup();
+            User organizer = event.getOrganizer();
+            adminEventsDTOS.add(new AdminEventsDTO(event.getId(),event.getName(),belongedGroup.getId(),belongedGroup.getGroupName(),organizer.getId(), organizer.getUsername(), event.getDateTime(), event.getCreationTime(),event.getLocation(), event.getType()));
+        }
+        return adminEventsDTOS;
+    }
+
+    @DeleteMapping("/delete-event")
+    public Response deleteEvent(@RequestParam("eventId") @NotEmpty @NotNull Long eventId){
+        try {
+            Event event = eventService.getEventById(eventId);
+            eventService.delete(eventId);
+            response.setSuccess(true);
+            response.setMessage(String.format("The event (eventName: %s) has been deleted", event.getName()));
+        }
+        catch (ObjectIsNullException e){
+            response.setSuccess(false);
+            response.setMessage("Something went wrong while deleting the event, Error: " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PostMapping("update-event-details")
+    public Response updateEvent(@RequestBody @Valid EventSaveRequest eventSaveRequest, Errors errors){
+        fieldErrorChecker(errors);
+        Event event = eventService.getEventById(eventSaveRequest.getEventId());
+        if(Objects.isNull(event))
+            throw new GeneralException("This event does not exists");
+
+        event.setName(eventSaveRequest.getEventName());
+        event.setDateTime(eventSaveRequest.getDateTime());
+        event.setLocation(eventSaveRequest.getLocation());
+        event.setType(eventSaveRequest.getType());
+        event.setDescription(event.getDescription());
+
+        eventService.save(event);
+        response.setSuccess(true);
+        response.setMessage("Event details updated successfully");
+        return  response;
+    }
+
+    @PostMapping("/create-event")
+    public Response createEvent(@RequestBody @Valid EventSaveRequest eventSaveRequest, Errors errors,
+                                HttpServletRequest req){
+        fieldErrorChecker(errors);
+
+        /*
+        Create event for desired group and assign event owner as group creator
+         */
+        List<String> messages = new ArrayList<>();
+
+        if(!groupService.existsByGroupId(eventSaveRequest.getGroupId()))
+            messages.add("Given id doesn't correspond to any group");
+        if(!messages.isEmpty())
+            throw new FieldException(null, messages);
+
+        Group group = groupService.getById(eventSaveRequest.getGroupId());
+        User groupOwner = group.getOwner();
+        Event event = Event.builder()
+                .name(eventSaveRequest.getEventName())
+                .group(group)
+                .organizer(groupOwner)
+                .acceptedMembers(new HashSet<>())
+                .location(eventSaveRequest.getLocation())
+                .description(eventSaveRequest.getDescription())
+                .dateTime(eventSaveRequest.getDateTime())
+                .type(eventSaveRequest.getType())
+                .creationTime(LocalDateTime.now())
+                .build();
+        event = eventService.save(event);
+        event.acceptedBy(groupOwner);
+        event = eventService.save(event);
+        String msg = event.getName() + " created by ADMIN and assigned to " + groupOwner.getUsername();
+        Log log = Log.builder().group(group).logMessage(msg).build();
+        logService.save(log);
+        response.setSuccess(true);
+        response.setMessage(msg);
+        return response;
+    }
+
+
 
 }

@@ -79,5 +79,9 @@ public class EventServiceImpl implements EventService {
         return eventDAO.getEventsByAcceptedMembersContaining(user);
     }
 
+    @Override
+    public List<Event> getAllEvents(){
+        return eventDAO.getEventsByOrderByGroupId();
+    }
 
 }
