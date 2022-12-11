@@ -1,15 +1,17 @@
 package com.event.eventwiseap.controller;
 
+import com.event.eventwiseap.dto.GroupSaveRequest;
 import com.event.eventwiseap.dto.Response;
 import com.event.eventwiseap.dto.UserDTO;
-import com.event.eventwiseap.dto.admin.UserCreateRequest;
-import com.event.eventwiseap.dto.admin.UserUpdateRequest;
+import com.event.eventwiseap.dto.admin.*;
 import com.event.eventwiseap.exception.FieldException;
 import com.event.eventwiseap.exception.ObjectIsNullException;
+import com.event.eventwiseap.model.Group;
 import com.event.eventwiseap.model.Role;
 import com.event.eventwiseap.model.RoleType;
 import com.event.eventwiseap.model.User;
 import com.event.eventwiseap.security.JWTUtils;
+import com.event.eventwiseap.service.GroupService;
 import com.event.eventwiseap.service.RoleService;
 import com.event.eventwiseap.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class AdminController {
     private final PasswordEncoder encoder;
     private final UserService userService;
     private final RoleService roleService;
+    private final GroupService groupService;
     private static final String SESSION_USERNAME = "username";
     private static Response response;
     static {
@@ -55,38 +58,47 @@ public class AdminController {
     }
 
     @GetMapping("/get-all-users")
-    public List<UserDTO> getAllUsers(HttpServletRequest req){
+    public List<AdminUserDTO> getAllUsers(HttpServletRequest req){
         List<User> users = userService.getAllUsers();
-        List<UserDTO> userDTOS = new ArrayList<>();
+        List<AdminUserDTO> adminUserDTOS = new ArrayList<>();
         for(User user: users)
-            userDTOS.add(new UserDTO(user.getId(),  user.getUsername(), user.getDisplayedName(), user.getLocation()));
+            adminUserDTOS.add(new AdminUserDTO(user.getId(),  user.getUsername(), user.getDisplayedName(),user.getEmail(), user.getLocation(), user.getRoles()));
 
-        return userDTOS;
+        return adminUserDTOS;
     }
 
+    /*
+    @GetMapping("/get-user-details")
+    public AdminUserDetailsDTO getUserDetails(@RequestParam("userId") @NotEmpty @NotNull Long userId, HttpServletRequest req){
+        User user = userService.getById(userId);
+        return AdminUserDetailsDTO.builder().id(user.getId()).username(user.getUsername()).email(user.getEmail()).displayedName(user.getDisplayedName())
+                .location(user.getLocation()).acceptedEvents(user.getAcceptedEvents()).groups(user.getGroups()).roles(user.getRoles()).build();
+    }
+    */
+
     @PostMapping("/create-user")
-    public Response createUser(@RequestBody @Valid UserCreateRequest userCreateRequest, Errors errors){
+    public Response createUser(@RequestBody @Valid AdminUserCreateRequest adminUserCreateRequest, Errors errors){
         fieldErrorChecker(errors);
 
         List<String> messages = new ArrayList<>();
-        if (userService.existsByUsername(userCreateRequest.getUsername()))
+        if (userService.existsByUsername(adminUserCreateRequest.getUsername()))
             messages.add("Username is already taken");
-        if (userService.existsByEmail(userCreateRequest.getEmail()))
+        if (userService.existsByEmail(adminUserCreateRequest.getEmail()))
             messages.add("Email is already in use");
-        if (!userCreateRequest.getPassword().equals(userCreateRequest.getConfirmPassword()))
+        if (!adminUserCreateRequest.getPassword().equals(adminUserCreateRequest.getConfirmPassword()))
             messages.add("New and confirm passwords do not match");
         if(!messages.isEmpty())
             throw new FieldException(null, messages);
 
         User user = User.builder()
-                .username(userCreateRequest.getUsername())
-                .email(userCreateRequest.getEmail())
-                .displayedName(userCreateRequest.getDisplayedName())
-                .password(encoder.encode(userCreateRequest.getPassword()))
-                .location(userCreateRequest.getLocation())
+                .username(adminUserCreateRequest.getUsername())
+                .email(adminUserCreateRequest.getEmail())
+                .displayedName(adminUserCreateRequest.getDisplayedName())
+                .password(encoder.encode(adminUserCreateRequest.getPassword()))
+                .location(adminUserCreateRequest.getLocation())
                 .build();
 
-        String stringRole = userCreateRequest.getRole();
+        String stringRole = adminUserCreateRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
         if (!Objects.isNull(stringRole)) {
@@ -104,19 +116,19 @@ public class AdminController {
     }
 
     @PostMapping("update-user-details")
-    public Response updateUser(@RequestBody @Valid UserUpdateRequest userUpdateRequest, Errors errors){
+    public Response updateUser(@RequestBody @Valid AdminUserUpdateRequest adminUserUpdateRequest, Errors errors){
         fieldErrorChecker(errors);
 
+        User user = userService.getById(adminUserUpdateRequest.getId());
         List<String> messages = new ArrayList<>();
-        if (userService.existsByUsername(userUpdateRequest.getUsername()))
+        if (userService.existsByUsername(adminUserUpdateRequest.getUsername()) && user.getUsername() != adminUserUpdateRequest.getUsername())
             messages.add("Username is already taken");
-        if (userService.existsByEmail(userUpdateRequest.getEmail()))
+        if (userService.existsByEmail(adminUserUpdateRequest.getEmail()) && user.getEmail() != adminUserUpdateRequest.getEmail())
             messages.add("Email is already in use");
         if(!messages.isEmpty())
             throw new FieldException(null, messages);
 
-        User user = userService.getById(userUpdateRequest.getId());
-        String stringRole = userUpdateRequest.getRole();
+        String stringRole = adminUserUpdateRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
         if (!Objects.isNull(stringRole)) {
@@ -127,10 +139,10 @@ public class AdminController {
         roles.add(roleService.findByName(RoleType.ROLE_USER));
 
         user.setRoles(roles);
-        user.setUsername(userUpdateRequest.getUsername());
-        user.setEmail(userUpdateRequest.getEmail());
-        user.setDisplayedName(userUpdateRequest.getDisplayedName());
-        user.setLocation(userUpdateRequest.getLocation());
+        user.setUsername(adminUserUpdateRequest.getUsername());
+        user.setEmail(adminUserUpdateRequest.getEmail());
+        user.setDisplayedName(adminUserUpdateRequest.getDisplayedName());
+        user.setLocation(adminUserUpdateRequest.getLocation());
         userService.save(user);
         response.setSuccess(true);
         response.setMessage("User details updated successfully");
@@ -153,5 +165,62 @@ public class AdminController {
         return response;
     }
 
+    @GetMapping("/get-all-groups")
+    public List<AdminGroupsDTO> getAllGroups(HttpServletRequest req){
+        List<Group> groups = groupService.getAllGroups();
+        List<AdminGroupsDTO> adminGroupDTOS = new ArrayList<>();
+        for(Group group: groups) {
+            String ownerUserName = group.getOwner().getUsername();
+            adminGroupDTOS.add(new AdminGroupsDTO(group.getId(), group.getGroupName(), group.getLocation(), group.getDescription(),ownerUserName));
+        }
+        return adminGroupDTOS;
+    }
+
+    /*
+    @GetMapping("/get-group-details")
+    public AdminGroupDetailsDTO getGroupDetails(@RequestParam("groupId") @NotEmpty @NotNull Long groupId, HttpServletRequest req){
+        User user = userService.getById(userId);
+        return AdminUserDetailsDTO.builder().id(user.getId()).username(user.getUsername()).email(user.getEmail()).displayedName(user.getDisplayedName())
+                .location(user.getLocation()).acceptedEvents(user.getAcceptedEvents()).groups(user.getGroups()).roles(user.getRoles()).build();
+    }
+     */
+
+    @PostMapping("update-group-details")
+    public Response updateGroup(@RequestBody @Valid GroupSaveRequest groupSaveRequest, Errors errors){
+        fieldErrorChecker(errors);
+
+        Group group = groupService.getById(groupSaveRequest.getGroupId());
+
+        List<String> messages = new ArrayList<>();
+        if (groupService.existsByGroupName(groupSaveRequest.getGroupName()) && group.getGroupName() != groupSaveRequest.getGroupName())
+            messages.add("Group Name is already taken");
+        if(!messages.isEmpty())
+            throw new FieldException(null, messages);
+
+
+        group.setGroupName(groupSaveRequest.getGroupName());
+        group.setLocation(groupSaveRequest.getLocation());
+        group.setDescription(groupSaveRequest.getDescription());
+        groupService.save(group);
+        response.setSuccess(true);
+        response.setMessage("Group details updated successfully");
+        return  response;
+    }
+
+    @DeleteMapping("/delete-group")
+    public Response deleteGroup(@RequestParam("groupId") @NotEmpty @NotNull Long groupId){
+        try {
+            Group group = groupService.getById(groupId);
+            groupService.delete(groupId);
+            response.setSuccess(true);
+            response.setMessage(String.format("The group (groupName: %s) has been deleted", group.getGroupName()));
+        }
+        catch (ObjectIsNullException e){
+            response.setSuccess(false);
+            response.setMessage("Something went wrong while deleting the group, Error: " + e.getMessage());
+        }
+
+        return response;
+    }
 
 }
