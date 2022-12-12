@@ -59,7 +59,7 @@ public class AdminController {
     }
 
     @GetMapping("/get-all-users")
-    public List<AdminUserDTO> getAllUsers(HttpServletRequest req){
+    public List<AdminUserDTO> getAllUsers(){
         List<User> users = userService.getAllUsers();
         List<AdminUserDTO> adminUserDTOS = new ArrayList<>();
         for(User user: users)
@@ -167,7 +167,7 @@ public class AdminController {
     }
 
     @GetMapping("/get-all-groups")
-    public List<AdminGroupsDTO> getAllGroups(HttpServletRequest req){
+    public List<AdminGroupsDTO> getAllGroups(){
         List<Group> groups = groupService.getAllGroups();
         List<AdminGroupsDTO> adminGroupDTOS = new ArrayList<>();
         for(Group group: groups) {
@@ -224,8 +224,38 @@ public class AdminController {
         return response;
     }
 
+    @PostMapping("/create-global-group")
+    public Response createGlobalGroup(@RequestBody @Valid GroupSaveRequest groupSaveRequest, Errors errors,
+                                      HttpServletRequest req){
+        final HttpSession session = req.getSession();
+        final String admin_username = session.getAttribute(SESSION_USERNAME).toString();
+        fieldErrorChecker(errors);
+
+        List<String> messages = new ArrayList<>();
+        if (groupService.existsByGroupName(groupSaveRequest.getGroupName()))
+            messages.add("Group Name is already taken");
+        if(!messages.isEmpty())
+            throw new FieldException(null, messages);
+
+        Group group = Group.builder()
+                .groupName(groupSaveRequest.getGroupName())
+                .groupMembers(new HashSet<>())
+                .location(groupSaveRequest.getLocation())
+                .description(groupSaveRequest.getDescription())
+                .owner(userService.getByUsername(admin_username))
+                .build();
+
+        groupService.save(group);
+        Set<User> all_users = new HashSet<>(userService.getAllUsers());
+        group.setGroupMembers(all_users);
+        groupService.save(group);
+        response.setSuccess(true);
+        response.setMessage("Global group is created successfully");
+        return  response;
+    }
+
     @GetMapping("/get-all-events")
-    public List<AdminEventsDTO> getAllEvents(HttpServletRequest req){
+    public List<AdminEventsDTO> getAllEvents(){
         List<Event> events = eventService.getAllEvents();
         List<AdminEventsDTO> adminEventsDTOS = new ArrayList<>();
         for(Event event: events){
@@ -272,8 +302,7 @@ public class AdminController {
     }
 
     @PostMapping("/create-event")
-    public Response createEvent(@RequestBody @Valid EventSaveRequest eventSaveRequest, Errors errors,
-                                HttpServletRequest req){
+    public Response createEvent(@RequestBody @Valid EventSaveRequest eventSaveRequest, Errors errors){
         fieldErrorChecker(errors);
 
         /*
