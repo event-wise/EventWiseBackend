@@ -193,7 +193,7 @@ public class AdminController {
         Group group = groupService.getById(groupSaveRequest.getGroupId());
 
         List<String> messages = new ArrayList<>();
-        if (groupService.existsByGroupName(groupSaveRequest.getGroupName()) && group.getGroupName() != groupSaveRequest.getGroupName())
+        if (groupService.existsByGroupName(groupSaveRequest.getGroupName()) && !group.getGroupName().equals(groupSaveRequest.getGroupName()))
             messages.add("Group Name is already taken");
         if(!messages.isEmpty())
             throw new FieldException(null, messages);
