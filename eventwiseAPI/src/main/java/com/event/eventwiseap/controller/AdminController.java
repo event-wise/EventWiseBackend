@@ -122,9 +122,9 @@ public class AdminController {
 
         User user = userService.getById(adminUserUpdateRequest.getId());
         List<String> messages = new ArrayList<>();
-        if (userService.existsByUsername(adminUserUpdateRequest.getUsername()) && user.getUsername() != adminUserUpdateRequest.getUsername())
+        if (userService.existsByUsername(adminUserUpdateRequest.getUsername()) && !user.getUsername().equals(adminUserUpdateRequest.getUsername()))
             messages.add("Username is already taken");
-        if (userService.existsByEmail(adminUserUpdateRequest.getEmail()) && user.getEmail() != adminUserUpdateRequest.getEmail())
+        if (userService.existsByEmail(adminUserUpdateRequest.getEmail()) && !user.getEmail().equals(adminUserUpdateRequest.getEmail()))
             messages.add("Email is already in use");
         if(!messages.isEmpty())
             throw new FieldException(null, messages);
