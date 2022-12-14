@@ -17,10 +17,11 @@ public interface GroupService {
     Set<Group> getGroupsByMember(User user);
 
     // Update
+    List<Group> getAllGroups();
 
-
+    boolean existsByGroupName(String groupName);
     // Delete
     Long delete(Long id);
     Long deleteByOwner(User user);
-
+    boolean existsByGroupId(Long id);
 }

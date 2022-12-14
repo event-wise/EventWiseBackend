@@ -4,6 +4,7 @@ import com.event.eventwiseap.model.Group;
 import com.event.eventwiseap.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import javax.persistence.OrderBy;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +19,13 @@ public interface GroupDAO extends JpaRepository<Group, Long> {
 
     Long deleteGroupByOwner(User user);
 
+    List<Group> getGroupByOrderByGroupName();
+
     @Transactional
     Long removeById(Long id);
+
+    boolean existsByGroupName(String groupName);
+
+    boolean existsById(Long id);
 
 }

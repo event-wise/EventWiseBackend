@@ -1,6 +1,5 @@
 package com.event.eventwiseap.service.impl;
 
-import com.event.eventwiseap.dao.EventDAO;
 import com.event.eventwiseap.dao.UserDAO;
 import com.event.eventwiseap.exception.ObjectIsNullException;
 import com.event.eventwiseap.model.Event;
@@ -11,7 +10,6 @@ import com.event.eventwiseap.service.GroupService;
 import com.event.eventwiseap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -24,6 +22,11 @@ public class UserServiceImpl implements UserService {
     private final GroupService groupService;
 
     private final EventService eventService;
+
+    @Override
+    public List<User> getAllUsers() {
+        return userDAO.getUserByOrderByUsername();
+    }
 
     @Override
     public User save(User user){

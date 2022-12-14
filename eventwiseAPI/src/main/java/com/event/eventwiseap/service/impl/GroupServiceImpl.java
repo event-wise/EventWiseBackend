@@ -98,4 +98,23 @@ public class GroupServiceImpl implements GroupService {
 
         return groupDAO.deleteGroupByOwner(user);
     }
+
+    @Override
+    public List<Group> getAllGroups(){return groupDAO.getGroupByOrderByGroupName();}
+
+    @Override
+    public boolean existsByGroupName(String groupName) {
+        if (Objects.isNull(groupName)) {
+            throw new ObjectIsNullException("Search param cannot be null");
+        }
+        return groupDAO.existsByGroupName(groupName);
+    }
+    @Override
+    public boolean existsByGroupId(Long id) {
+        if (Objects.isNull(id)) {
+            throw new ObjectIsNullException("Search param cannot be null");
+        }
+        return groupDAO.existsById(id);
+    }
+
 }

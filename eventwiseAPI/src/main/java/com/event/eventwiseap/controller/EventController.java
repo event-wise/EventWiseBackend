@@ -92,7 +92,7 @@ public class EventController {
     }
 
     @PostMapping("/update-event")
-    public Response updateGroup(@RequestBody @Valid EventSaveRequest eventUpdateRequest, Errors errors,
+    public Response updateEvent(@RequestBody @Valid EventSaveRequest eventUpdateRequest, Errors errors,
                                 HttpServletRequest req){
         fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
