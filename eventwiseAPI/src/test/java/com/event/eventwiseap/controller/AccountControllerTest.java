@@ -1,9 +1,7 @@
 package com.event.eventwiseap.controller;
 
-import static net.bytebuddy.matcher.ElementMatchers.is;
+
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.BDDMockito.given;
 

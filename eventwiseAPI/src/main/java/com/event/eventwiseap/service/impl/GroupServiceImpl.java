@@ -55,7 +55,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public Set<Group> getGroupsByMember(User user) {
+    public List<Group> getGroupsByMember(User user) {
         if (Objects.isNull(user)) {
             throw new ObjectIsNullException("User cannot be null (group by owner)");
         }
