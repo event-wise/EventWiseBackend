@@ -1,5 +1,6 @@
 package com.event.eventwiseap.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
@@ -22,5 +23,6 @@ public class EventsDTO {
     private String eventName;
 
     @NotNull(message = "Event mush have a time")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSS]'Z'")
     private LocalDateTime dateTime;
 }

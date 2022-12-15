@@ -1,10 +1,12 @@
 package com.event.eventwiseap.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.validation.constraints.*;
 
 @Getter
+@AllArgsConstructor
 public class ProfileUpdateRequest {
 
     @NotEmpty(message = "Displayed name cannot be empty")
