@@ -150,7 +150,7 @@ public class AdminController {
         return  response;
     }
 
-    @DeleteMapping("/delete-user")
+    @PostMapping("/delete-user")
     public Response deleteUser(@RequestParam("userId") @NotEmpty @NotNull Long userId){
         try {
             User user = userService.getById(userId);
@@ -208,7 +208,7 @@ public class AdminController {
         return  response;
     }
 
-    @DeleteMapping("/delete-group")
+    @PostMapping("/delete-group")
     public Response deleteGroup(@RequestParam("groupId") @NotEmpty @NotNull Long groupId){
         try {
             Group group = groupService.getById(groupId);
@@ -266,7 +266,7 @@ public class AdminController {
         return adminEventsDTOS;
     }
 
-    @DeleteMapping("/delete-event")
+    @PostMapping("/delete-event")
     public Response deleteEvent(@RequestParam("eventId") @NotEmpty @NotNull Long eventId){
         try {
             Event event = eventService.getEventById(eventId);
