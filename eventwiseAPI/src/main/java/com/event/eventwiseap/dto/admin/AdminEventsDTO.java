@@ -53,4 +53,8 @@ public class AdminEventsDTO {
     @NotEmpty(message = "Type cannot be empty")
     @Size(max = 20, message = "Type must contain 20 characters at most")
     private String type;
+
+    @NotNull(message = "Description cannot be null")
+    @Size(max = 500, message = "Description must contain 500 characters at most")
+    private String description;
 }

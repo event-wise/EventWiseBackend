@@ -261,7 +261,7 @@ public class AdminController {
         for(Event event: events){
             Group belongedGroup = event.getGroup();
             User organizer = event.getOrganizer();
-            adminEventsDTOS.add(new AdminEventsDTO(event.getId(),event.getName(),belongedGroup.getId(),belongedGroup.getGroupName(),organizer.getId(), organizer.getUsername(), event.getDateTime(), event.getCreationTime(),event.getLocation(), event.getType()));
+            adminEventsDTOS.add(new AdminEventsDTO(event.getId(),event.getName(),belongedGroup.getId(),belongedGroup.getGroupName(),organizer.getId(), organizer.getUsername(), event.getDateTime(), event.getCreationTime(),event.getLocation(), event.getType(),event.getDescription()));
         }
         return adminEventsDTOS;
     }
