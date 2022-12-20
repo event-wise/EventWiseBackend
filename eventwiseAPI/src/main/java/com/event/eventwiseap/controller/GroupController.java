@@ -98,12 +98,12 @@ public class GroupController {
     }
 
     @GetMapping("/list-user-groups")
-    public Set<GroupsDTO> listUserGroups(HttpServletRequest req){
+    public List<GroupsDTO> listUserGroups(HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
         User user = userService.getByUsername(username);
-        Set<Group> groups = groupService.getGroupsByMember(user);
-        Set<GroupsDTO> groupsDTOs = new HashSet<>();
+        List<Group> groups = groupService.getGroupsByMember(user);
+        List<GroupsDTO> groupsDTOs = new ArrayList<>();
 
         for(Group group : groups){
             groupsDTOs.add(new GroupsDTO(group.getId(), group.getGroupName(), group.getLocation()));
@@ -129,7 +129,7 @@ public class GroupController {
 
         List<EventsDTO> eventsDTOs = new ArrayList<>();
         List<String> logMessages = new ArrayList<>();
-        Set<String> members = new HashSet<>();
+        List<String> members = new ArrayList<>();
 
         for(Event event: events)
             eventsDTOs.add(new EventsDTO(event.getId(),event.getName(), event.getDateTime()));
@@ -206,7 +206,8 @@ public class GroupController {
         }
 
         User subject = userService.getById(memberAddRemoveRequest.getSubjectUserId());
-
+        response.setSuccess(false);
+        response.setMessage("Something went wrong");
         if(!Objects.isNull(subject)){
 
             if(group.getGroupMembers().contains(subject) && group.removeMember(subject))
@@ -219,10 +220,6 @@ public class GroupController {
                 response.setSuccess(true);
                 response.setMessage("Member '" + subject.getUsername() + "' added to group");
                 groupService.save(group);
-            }
-            else{
-                response.setSuccess(false);
-                response.setMessage("Something went wrong");
             }
         }
         else{

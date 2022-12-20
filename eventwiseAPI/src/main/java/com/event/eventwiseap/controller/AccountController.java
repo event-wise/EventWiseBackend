@@ -96,14 +96,14 @@ public class AccountController {
     @PostMapping("/login")
     public JWTResponse authenticateUser(@RequestBody @Valid LoginRequest loginRequest, Errors errors){
         fieldErrorChecker(errors);
+        if(!userService.existsByUsername(loginRequest.getUsername()))
+            throw new GeneralException("There is no such an account");
         Authentication authentication =
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
                         loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
-
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
         log.info("User (name = {}) logged in to the system", loginRequest.getUsername());
         JWTResponse jwtResponse = JWTResponse.builder()
@@ -123,12 +123,8 @@ public class AccountController {
         String user = session.getAttribute(SESSION_USERNAME).toString();
         SecurityContextHolder.clearContext();
         session = req.getSession(false);
-        if(session != null){
+        if(session != null)
             session.invalidate();
-        }
-        for(Cookie cookie : req.getCookies()) {
-            cookie.setMaxAge(0);
-        }
         response.setSuccess(true);
         response.setMessage(String.format("%s - logged out", user));
         return response;
@@ -139,16 +135,12 @@ public class AccountController {
     public Response deleteAccount(HttpServletRequest req){
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
-        try{
-            final User user = userService.getByUsername(username);
-            userService.delete(user.getId());
-            response.setSuccess(true);
-            response.setMessage(String.format("The account (username: %s, email: %s) has been deleted", user.getUsername(),user.getEmail()));
-        }
-        catch (ObjectIsNullException e){
-            response.setSuccess(false);
-            response.setMessage("Something went wrong while deleting the account, Error: " + e.getMessage());
-        }
+        final User user = userService.getByUsername(username);
+        if(Objects.isNull(user))
+            throw new GeneralException("There is no such a user");
+        userService.delete(user.getId());
+        response.setSuccess(true);
+        response.setMessage(String.format("The account (username: %s, email: %s) has been deleted", user.getUsername(),user.getEmail()));
         if(response.isSuccess()){
             session.invalidate();
         }
@@ -167,8 +159,7 @@ public class AccountController {
 
     @PostMapping("/update-profile")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public Response updateProfile(@RequestBody @Valid ProfileUpdateRequest profileUpdateRequest, Errors errors,
-                                  HttpServletRequest req){
+    public Response updateProfile(@RequestBody @Valid ProfileUpdateRequest profileUpdateRequest, Errors errors, HttpServletRequest req){
         fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
@@ -183,8 +174,7 @@ public class AccountController {
 
     @PostMapping("/change-password")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public Response changePassword(@RequestBody @Valid PasswordChangeRequest passwordChangeRequest,Errors errors,
-                                   HttpServletRequest req){
+    public Response changePassword(@RequestBody @Valid PasswordChangeRequest passwordChangeRequest,Errors errors, HttpServletRequest req){
         fieldErrorChecker(errors);
         final HttpSession session = req.getSession();
         final String username = session.getAttribute(SESSION_USERNAME).toString();
@@ -196,7 +186,6 @@ public class AccountController {
             messages.add("New and confirm passwords do not match");
         if(!messages.isEmpty())
             throw new FieldException(null, messages);
-
         user.setPassword(encoder.encode(passwordChangeRequest.getNewPassword()));
         userService.save(user);
         response.setSuccess(true);

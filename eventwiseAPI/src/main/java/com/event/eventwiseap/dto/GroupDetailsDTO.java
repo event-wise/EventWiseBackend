@@ -9,7 +9,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -36,7 +35,7 @@ public class GroupDetailsDTO {
     @Size(max = 500, message = "Description must contain 500 characters at most")
     private String description;
 
-    private Set<String> members;
+    private List<String> members;
 
     private List<EventsDTO> events;
 

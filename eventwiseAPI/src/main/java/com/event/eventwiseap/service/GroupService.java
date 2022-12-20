@@ -4,7 +4,6 @@ import com.event.eventwiseap.model.Group;
 import com.event.eventwiseap.model.User;
 
 import java.util.List;
-import java.util.Set;
 
 public interface GroupService {
     // Create and update
@@ -14,7 +13,7 @@ public interface GroupService {
     // Read
     Group getById(Long id);
     List<Group> getGroupsByOwner(User user);
-    Set<Group> getGroupsByMember(User user);
+    List<Group> getGroupsByMember(User user);
 
     // Update
     List<Group> getAllGroups();
