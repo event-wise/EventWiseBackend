@@ -2,6 +2,8 @@ package com.event.eventwiseap.controller;
 
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.BDDMockito.given;
 
@@ -14,6 +16,7 @@ import com.event.eventwiseap.model.RoleType;
 import com.event.eventwiseap.model.User;
 import com.event.eventwiseap.security.AuthEntryPointJWT;
 import com.event.eventwiseap.security.JWTUtils;
+import com.event.eventwiseap.security.UserDetailsImpl;
 import com.event.eventwiseap.service.RoleService;
 import com.event.eventwiseap.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,17 +31,25 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,7 +57,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AccountController.class)
-
+@ContextConfiguration
+@WebAppConfiguration
 class AccountControllerTest {
     @Autowired
     private MockMvc mvc;
@@ -117,7 +129,7 @@ class AccountControllerTest {
     }
 
     @Test
-    void check_register_user_with_correct_user_information() throws Exception{
+    void check_register_user_with_correct_user_information_should_return_OK() throws Exception{
         // given
         given(userService.existsByUsername(user.getUsername())).willReturn(false);
         given(userService.existsByUsername(user.getEmail())).willReturn(false);
@@ -132,7 +144,7 @@ class AccountControllerTest {
         MvcResult mvcResult = mvc.perform(request).andExpect(jsonPath("$.success").value(true)).andReturn();
     }
     @Test
-    void check_register_user_with_incorrect_field() throws Exception{
+    void check_register_user_with_incorrect_field_should_return_Bad_Request() throws Exception{
         // given
         given(userService.existsByUsername(user.getUsername())).willReturn(false);
         given(userService.existsByEmail(user.getEmail())).willReturn(false);
@@ -150,7 +162,7 @@ class AccountControllerTest {
                 .andExpect(jsonPath("$.messages[0]").value("Not a proper E-mail")).andReturn();
     }
     @Test
-    void check_register_user_with_existing_username_email() throws Exception{
+    void check_register_user_with_existing_username_email_should_return_Bad_Request() throws Exception{
         //given
         given(userService.existsByUsername(user.getUsername())).willReturn(true);
         given(userService.existsByEmail(user.getEmail())).willReturn(true);
@@ -185,23 +197,63 @@ class AccountControllerTest {
                 .andReturn();
     }
 
-//    @Test
-//    @WithUserDetails(value = "balik18", userDetailsServiceBeanName = "UserDetailsService")
-//    void check_login_user_with_correct_information() throws Exception{
-//        //given
-//        LoginRequest req = new LoginRequest("balik18", "string");
-//        //when
-//        RequestBuilder request = MockMvcRequestBuilders
-//                .post("/api/account/login")
-//                .accept(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(content))
-//                .contentType(MediaType.APPLICATION_JSON);
-//        MvcResult mvcResult = mvc.perform(request).andExpect(status().isOk()).andReturn();
-//    }
+    @Test
+    void check_login_user_with_correct_information() throws Exception{
+        //given
+        LoginRequest req = new LoginRequest("balik18", "string");
+        given(userService.existsByUsername(req.getUsername())).willReturn(true);
+        given(userService.getByUsername(req.getUsername())).willReturn(user);
+        UserDetails ud = UserDetailsImpl.build(user);
+        given(userDetailsService.loadUserByUsername(req.getUsername())).willReturn(ud);
+        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).willReturn(new Authentication() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return null;
+            }
+
+            @Override
+            public Object getCredentials() {
+                return null;
+            }
+
+            @Override
+            public Object getDetails() {
+                return null;
+            }
+
+            @Override
+            public Object getPrincipal() {
+                return ud;
+            }
+
+            @Override
+            public boolean isAuthenticated() {
+                return true;
+            }
+
+            @Override
+            public void setAuthenticated(boolean b) throws IllegalArgumentException {
+
+            }
+
+            @Override
+            public String getName() {
+                return null;
+            }
+        });
+
+        //when
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/account/login").with(user("balik18").password("string").roles("USER"))
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(content))
+                .contentType(MediaType.APPLICATION_JSON);
+        MvcResult mvcResult = mvc.perform(request).andExpect(status().isOk()).andReturn();
+    }
 
     @Test
     @WithMockUser(roles = {"USER"})
-    void check_logout() throws Exception{
+    void check_logout_should_return_OK() throws Exception{
         //given
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("username", user.getUsername());
@@ -216,7 +268,7 @@ class AccountControllerTest {
     }
     @Test
     @WithMockUser(roles = {"USER"})
-    void check_profile_request() throws Exception{
+    void check_profile_request_should_return_OK() throws Exception{
         //given
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("username", user.getUsername());
@@ -232,7 +284,7 @@ class AccountControllerTest {
 
     @Test
     @WithMockUser(roles = {"USER"}, password = "string")
-    void check_change_password_with_correct_information() throws Exception{
+    void check_change_password_with_correct_information_should_return_OK() throws Exception{
         //given
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("username", user.getUsername());
@@ -254,7 +306,7 @@ class AccountControllerTest {
     }
     @Test
     @WithMockUser(roles = {"USER"})
-    void check_change_password_with_incorrect_information() throws Exception{
+    void check_change_password_with_incorrect_information_should_return_Bad_Request() throws Exception{
         //given
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("username", user.getUsername());
@@ -277,7 +329,7 @@ class AccountControllerTest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    void check_delete_account_OK() throws Exception{
+    void check_delete_account_should_return_OK() throws Exception{
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("username", user.getUsername());
         given(userService.getByUsername(user.getUsername())).willReturn(user);
@@ -292,7 +344,7 @@ class AccountControllerTest {
     }
     @Test
     @WithMockUser(roles = {"USER"})
-    void check_delete_account_BAD() throws Exception{
+    void check_delete_account_should_return_Bad_Request() throws Exception{
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("username", user.getUsername());
         given(userService.getByUsername(user.getUsername())).willReturn(null);
@@ -308,7 +360,7 @@ class AccountControllerTest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    void check_update_profile_OK() throws Exception{
+    void check_update_profile_should_return_OK() throws Exception{
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("username", user.getUsername());
         given(userService.getByUsername(user.getUsername())).willReturn(user);
