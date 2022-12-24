@@ -122,9 +122,9 @@ public class AdminController {
 
         User user = userService.getById(adminUserUpdateRequest.getId());
         List<String> messages = new ArrayList<>();
-        if (userService.existsByUsername(adminUserUpdateRequest.getUsername()) && user.getUsername() != adminUserUpdateRequest.getUsername())
+        if (userService.existsByUsername(adminUserUpdateRequest.getUsername()) && !user.getUsername().equals(adminUserUpdateRequest.getUsername()))
             messages.add("Username is already taken");
-        if (userService.existsByEmail(adminUserUpdateRequest.getEmail()) && user.getEmail() != adminUserUpdateRequest.getEmail())
+        if (userService.existsByEmail(adminUserUpdateRequest.getEmail()) && !user.getEmail().equals(adminUserUpdateRequest.getEmail()))
             messages.add("Email is already in use");
         if(!messages.isEmpty())
             throw new FieldException(null, messages);
@@ -150,7 +150,7 @@ public class AdminController {
         return  response;
     }
 
-    @DeleteMapping("/delete-user")
+    @PostMapping("/delete-user")
     public Response deleteUser(@RequestParam("userId") @NotEmpty @NotNull Long userId){
         try {
             User user = userService.getById(userId);
@@ -193,7 +193,7 @@ public class AdminController {
         Group group = groupService.getById(groupSaveRequest.getGroupId());
 
         List<String> messages = new ArrayList<>();
-        if (groupService.existsByGroupName(groupSaveRequest.getGroupName()) && group.getGroupName() != groupSaveRequest.getGroupName())
+        if (groupService.existsByGroupName(groupSaveRequest.getGroupName()) && !group.getGroupName().equals(groupSaveRequest.getGroupName()))
             messages.add("Group Name is already taken");
         if(!messages.isEmpty())
             throw new FieldException(null, messages);
@@ -208,7 +208,7 @@ public class AdminController {
         return  response;
     }
 
-    @DeleteMapping("/delete-group")
+    @PostMapping("/delete-group")
     public Response deleteGroup(@RequestParam("groupId") @NotEmpty @NotNull Long groupId){
         try {
             Group group = groupService.getById(groupId);
@@ -261,12 +261,12 @@ public class AdminController {
         for(Event event: events){
             Group belongedGroup = event.getGroup();
             User organizer = event.getOrganizer();
-            adminEventsDTOS.add(new AdminEventsDTO(event.getId(),event.getName(),belongedGroup.getId(),belongedGroup.getGroupName(),organizer.getId(), organizer.getUsername(), event.getDateTime(), event.getCreationTime(),event.getLocation(), event.getType()));
+            adminEventsDTOS.add(new AdminEventsDTO(event.getId(),event.getName(),belongedGroup.getId(),belongedGroup.getGroupName(),organizer.getId(), organizer.getUsername(), event.getDateTime(), event.getCreationTime(),event.getLocation(), event.getType(),event.getDescription()));
         }
         return adminEventsDTOS;
     }
 
-    @DeleteMapping("/delete-event")
+    @PostMapping("/delete-event")
     public Response deleteEvent(@RequestParam("eventId") @NotEmpty @NotNull Long eventId){
         try {
             Event event = eventService.getEventById(eventId);
