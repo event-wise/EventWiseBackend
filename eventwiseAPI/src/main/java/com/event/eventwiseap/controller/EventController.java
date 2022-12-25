@@ -176,7 +176,7 @@ public class EventController {
         if(Objects.isNull(event)){
             throw new GeneralException("This event does not exists");
         }
-        if(!event.getOrganizer().equals(user) || !event.getGroup().isOwner(user))
+        if(!event.getOrganizer().equals(user) && !event.getGroup().isOwner(user))
             throw new GeneralException("Only the organizer or the group owner can delete the event");
         String msg = event.getName() + " delete by " + user.getUsername();
         eventService.delete(eventId);
