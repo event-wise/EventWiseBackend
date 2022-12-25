@@ -151,10 +151,11 @@ public class AdminController {
     }
 
     @PostMapping("/delete-user")
-    public Response deleteUser(@RequestParam("userId") @NotEmpty @NotNull Long userId){
+    public Response deleteUser(@RequestBody @Valid AdminDeleteRequest adminDeleteRequest, Errors errors){
+        fieldErrorChecker(errors);
         try {
-            User user = userService.getById(userId);
-            userService.delete(userId);
+            User user = userService.getById(adminDeleteRequest.getId());
+            userService.delete(adminDeleteRequest.getId());
             response.setSuccess(true);
             response.setMessage(String.format("The account (username: %s, email: %s) has been deleted", user.getUsername(),user.getEmail()));
         }
@@ -209,10 +210,11 @@ public class AdminController {
     }
 
     @PostMapping("/delete-group")
-    public Response deleteGroup(@RequestParam("groupId") @NotEmpty @NotNull Long groupId){
+    public Response deleteGroup(@RequestBody @Valid AdminDeleteRequest adminDeleteRequest, Errors errors){
+        fieldErrorChecker(errors);
         try {
-            Group group = groupService.getById(groupId);
-            groupService.delete(groupId);
+            Group group = groupService.getById(adminDeleteRequest.getId());
+            groupService.delete(adminDeleteRequest.getId());
             response.setSuccess(true);
             response.setMessage(String.format("The group (groupName: %s) has been deleted", group.getGroupName()));
         }
@@ -267,10 +269,11 @@ public class AdminController {
     }
 
     @PostMapping("/delete-event")
-    public Response deleteEvent(@RequestParam("eventId") @NotEmpty @NotNull Long eventId){
+    public Response deleteEvent(@RequestBody @Valid AdminDeleteRequest adminDeleteRequest, Errors errors){
+        fieldErrorChecker(errors);
         try {
-            Event event = eventService.getEventById(eventId);
-            eventService.delete(eventId);
+            Event event = eventService.getEventById(adminDeleteRequest.getId());
+            eventService.delete(adminDeleteRequest.getId());
             response.setSuccess(true);
             response.setMessage(String.format("The event (eventName: %s) has been deleted", event.getName()));
         }
