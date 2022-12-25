@@ -122,9 +122,9 @@ public class AdminController {
 
         User user = userService.getById(adminUserUpdateRequest.getId());
         List<String> messages = new ArrayList<>();
-        if (userService.existsByUsername(adminUserUpdateRequest.getUsername()) && user.getUsername() != adminUserUpdateRequest.getUsername())
+        if (userService.existsByUsername(adminUserUpdateRequest.getUsername()) && !user.getUsername().equals(adminUserUpdateRequest.getUsername()))
             messages.add("Username is already taken");
-        if (userService.existsByEmail(adminUserUpdateRequest.getEmail()) && user.getEmail() != adminUserUpdateRequest.getEmail())
+        if (userService.existsByEmail(adminUserUpdateRequest.getEmail()) && !user.getEmail().equals(adminUserUpdateRequest.getEmail()))
             messages.add("Email is already in use");
         if(!messages.isEmpty())
             throw new FieldException(null, messages);
@@ -150,11 +150,12 @@ public class AdminController {
         return  response;
     }
 
-    @DeleteMapping("/delete-user")
-    public Response deleteUser(@RequestParam("userId") @NotEmpty @NotNull Long userId){
+    @PostMapping("/delete-user")
+    public Response deleteUser(@RequestBody @Valid AdminDeleteRequest adminDeleteRequest, Errors errors){
+        fieldErrorChecker(errors);
         try {
-            User user = userService.getById(userId);
-            userService.delete(userId);
+            User user = userService.getById(adminDeleteRequest.getId());
+            userService.delete(adminDeleteRequest.getId());
             response.setSuccess(true);
             response.setMessage(String.format("The account (username: %s, email: %s) has been deleted", user.getUsername(),user.getEmail()));
         }
@@ -193,7 +194,7 @@ public class AdminController {
         Group group = groupService.getById(groupSaveRequest.getGroupId());
 
         List<String> messages = new ArrayList<>();
-        if (groupService.existsByGroupName(groupSaveRequest.getGroupName()) && group.getGroupName() != groupSaveRequest.getGroupName())
+        if (groupService.existsByGroupName(groupSaveRequest.getGroupName()) && !group.getGroupName().equals(groupSaveRequest.getGroupName()))
             messages.add("Group Name is already taken");
         if(!messages.isEmpty())
             throw new FieldException(null, messages);
@@ -208,11 +209,12 @@ public class AdminController {
         return  response;
     }
 
-    @DeleteMapping("/delete-group")
-    public Response deleteGroup(@RequestParam("groupId") @NotEmpty @NotNull Long groupId){
+    @PostMapping("/delete-group")
+    public Response deleteGroup(@RequestBody @Valid AdminDeleteRequest adminDeleteRequest, Errors errors){
+        fieldErrorChecker(errors);
         try {
-            Group group = groupService.getById(groupId);
-            groupService.delete(groupId);
+            Group group = groupService.getById(adminDeleteRequest.getId());
+            groupService.delete(adminDeleteRequest.getId());
             response.setSuccess(true);
             response.setMessage(String.format("The group (groupName: %s) has been deleted", group.getGroupName()));
         }
@@ -261,16 +263,17 @@ public class AdminController {
         for(Event event: events){
             Group belongedGroup = event.getGroup();
             User organizer = event.getOrganizer();
-            adminEventsDTOS.add(new AdminEventsDTO(event.getId(),event.getName(),belongedGroup.getId(),belongedGroup.getGroupName(),organizer.getId(), organizer.getUsername(), event.getDateTime(), event.getCreationTime(),event.getLocation(), event.getType()));
+            adminEventsDTOS.add(new AdminEventsDTO(event.getId(),event.getName(),belongedGroup.getId(),belongedGroup.getGroupName(),organizer.getId(), organizer.getUsername(), event.getDateTime(), event.getCreationTime(),event.getLocation(), event.getType(),event.getDescription()));
         }
         return adminEventsDTOS;
     }
 
-    @DeleteMapping("/delete-event")
-    public Response deleteEvent(@RequestParam("eventId") @NotEmpty @NotNull Long eventId){
+    @PostMapping("/delete-event")
+    public Response deleteEvent(@RequestBody @Valid AdminDeleteRequest adminDeleteRequest, Errors errors){
+        fieldErrorChecker(errors);
         try {
-            Event event = eventService.getEventById(eventId);
-            eventService.delete(eventId);
+            Event event = eventService.getEventById(adminDeleteRequest.getId());
+            eventService.delete(adminDeleteRequest.getId());
             response.setSuccess(true);
             response.setMessage(String.format("The event (eventName: %s) has been deleted", event.getName()));
         }
