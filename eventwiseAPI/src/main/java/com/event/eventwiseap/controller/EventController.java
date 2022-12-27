@@ -178,7 +178,7 @@ public class EventController {
         }
         if(!event.getOrganizer().equals(user) && !event.getGroup().isOwner(user))
             throw new GeneralException("Only the organizer or the group owner can delete the event");
-        String msg = event.getName() + " delete by " + user.getUsername();
+        String msg = event.getName() + " deleted by " + user.getUsername();
         eventService.delete(eventId);
         Log log = Log.builder().group(event.getGroup()).logMessage(msg).build();
         logService.save(log);

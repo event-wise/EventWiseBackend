@@ -2,7 +2,7 @@
 <html xmlns:str="http://exslt.org/strings" xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Test Results &mdash; GroupControllerTest</title>
+        <title>Test Results &mdash; AccountControllerTest</title>
         <style type="text/css">
           html {
             height: 100%
@@ -572,9 +572,9 @@ jQuery.cookie = function(name, value, options) {
     <body>
         <div id="container">
             <div id="header">
-                <div class="time" xmlns="">765 ms</div>
+                <div class="time" xmlns="">925 ms</div>
                 <h1>
-                    GroupControllerTest: <strong><span class="total" xmlns="http://www.w3.org/1999/xhtml">25 total, </span><span class="passed">25 passed</span></strong>
+                    AccountControllerTest: <strong><span class="total" xmlns="http://www.w3.org/1999/xhtml">12 total, </span><span class="passed">12 passed</span></strong>
                 </h1>
                 <div id="treecontrol">
                     <ul>
@@ -593,138 +593,78 @@ jQuery.cookie = function(name, value, options) {
                 <ul id="tree">
                     <li xmlns="" class="level top open">
                         <span><em class="time">
-                                <div class="time">765 ms</div>
-                            </em>GroupControllerTest</span>
+                                <div class="time">925 ms</div>
+                            </em>AccountControllerTest</span>
                         <ul>
                             <li class="level test">
                                 <span><em class="time">
-                                        <div class="time">401 ms</div>
-                                    </em><em class="status">passed</em>check_updateGroup_with_null_id_should_return_bad_request()</span>
+                                        <div class="time">542 ms</div>
+                                    </em><em class="status">passed</em>check_change_password_with_correct_information_should_return_OK()</span>
                             </li>
                             <li class="level test">
                                 <span><em class="time">
-                                        <div class="time">27 ms</div>
-                                    </em><em class="status">passed</em>check_deleteGroup_with_not_owner_should_return_bad_request()</span>
+                                        <div class="time">72 ms</div>
+                                    </em><em class="status">passed</em>check_register_user_with_existing_username_email_should_return_Bad_Request()</span>
                             </li>
                             <li class="level test">
                                 <span><em class="time">
-                                        <div class="time">19 ms</div>
-                                    </em><em class="status">passed</em>check_add_remove_member_with_nonexistent_group_should_return_bad_request()</span>
+                                        <div class="time">7 ms</div>
+                                    </em><em class="status">passed</em>check_logout_should_return_OK()</span>
+                            </li>
+                            <li class="level test">
+                                <span><em class="time">
+                                        <div class="time">16 ms</div>
+                                    </em><em class="status">passed</em>check_update_profile_should_return_OK()</span>
                             </li>
                             <li class="level test">
                                 <span><em class="time">
                                         <div class="time">12 ms</div>
-                                    </em><em class="status">passed</em>check_exitFromGroup_with_non_existent_group_should_return_bad_request()</span>
+                                    </em><em class="status">passed</em>check_login_with_nonexistent_account_should_return_bad_request()</span>
                             </li>
                             <li class="level test">
                                 <span><em class="time">
-                                        <div class="time">37 ms</div>
-                                    </em><em class="status">passed</em>check_getGroupDetails_with_correct_info_should_return_OK()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">17 ms</div>
-                                    </em><em class="status">passed</em>check_deleteGroup_with_correct_info_should_return_OK()</span>
+                                        <div class="time">80 ms</div>
+                                    </em><em class="status">passed</em>check_register_user_with_correct_user_information_should_return_OK()</span>
                                 <ul>
                                     <li class="text">
-                                        <span class="stdout">2022-12-27 13:46:39.391  INFO 7416 --- [           main] c.e.e.controller.GroupController         : User &#39;balik18&#39; deleted the group with ID = 1<br/></span>
+                                        <span class="stdout">2022-12-27 13:43:58.486  INFO 17280 --- [           main] c.e.e.controller.AccountController       : New user (name = balik18) is registered to the system<br/></span>
                                     </li>
                                 </ul>
                             </li>
                             <li class="level test">
                                 <span><em class="time">
-                                        <div class="time">30 ms</div>
-                                    </em><em class="status">passed</em>check_createGroup_with_field_error_should_return_bad_request()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">23 ms</div>
-                                    </em><em class="status">passed</em>check_searchMember_with_not_member_should_return_bad_request()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">13 ms</div>
-                                    </em><em class="status">passed</em>check_getGroupDetails_with_nonexistent_group_should_return_bad_request()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">12 ms</div>
-                                    </em><em class="status">passed</em>check_searchMember_with_nonexistent_group_should_return_bad_request()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">11 ms</div>
-                                    </em><em class="status">passed</em>check_updateGroup_with_not_owner_should_return_bad_request()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">9 ms</div>
-                                    </em><em class="status">passed</em>check_deleteGroup_with_nonexistent_group_should_return_bad_request()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
                                         <div class="time">10 ms</div>
-                                    </em><em class="status">passed</em>check_searchMember_with_search_null_should_return_OK()</span>
+                                    </em><em class="status">passed</em>check_profile_request_should_return_OK()</span>
+                            </li>
+                            <li class="level test">
+                                <span><em class="time">
+                                        <div class="time">138 ms</div>
+                                    </em><em class="status">passed</em>check_change_password_with_incorrect_information_should_return_Bad_Request()</span>
+                            </li>
+                            <li class="level test">
+                                <span><em class="time">
+                                        <div class="time">20 ms</div>
+                                    </em><em class="status">passed</em>check_login_user_with_correct_information()</span>
+                                <ul>
+                                    <li class="text">
+                                        <span class="stdout">2022-12-27 13:43:58.655  INFO 17280 --- [           main] c.e.e.controller.AccountController       : User (name = balik18) logged in to the system<br/></span>
+                                    </li>
+                                </ul>
                             </li>
                             <li class="level test">
                                 <span><em class="time">
                                         <div class="time">12 ms</div>
-                                    </em><em class="status">passed</em>check_updateGroup_with_correct_info_should_return_OK()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">12 ms</div>
-                                    </em><em class="status">passed</em>check_searchMember_with_search_should_return_OK()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">23 ms</div>
-                                    </em><em class="status">passed</em>check_add_remove_member_add_should_return_OK()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">10 ms</div>
-                                    </em><em class="status">passed</em>check_add_remove_member_remove_should_return_OK()</span>
+                                    </em><em class="status">passed</em>check_register_user_with_incorrect_field_should_return_Bad_Request()</span>
                             </li>
                             <li class="level test">
                                 <span><em class="time">
                                         <div class="time">8 ms</div>
-                                    </em><em class="status">passed</em>check_updateGroup_with_nonexistent_group_should_return_bad_request()</span>
+                                    </em><em class="status">passed</em>check_delete_account_should_return_OK()</span>
                             </li>
                             <li class="level test">
                                 <span><em class="time">
-                                        <div class="time">12 ms</div>
-                                    </em><em class="status">passed</em>check_listUserGroups_with_correct_info_should_return_OK()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">11 ms</div>
-                                    </em><em class="status">passed</em>check_add_remove_member_with_nonexistent_user_should_return_false()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">13 ms</div>
-                                    </em><em class="status">passed</em>check_createGroup_without_field_error_should_return_OK()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">11 ms</div>
-                                    </em><em class="status">passed</em>check_add_remove_member_with_not_member_group_should_return_bad_request()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">10 ms</div>
-                                    </em><em class="status">passed</em>check_exitFromGroup_with_not_member_return_bad_request()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">11 ms</div>
-                                    </em><em class="status">passed</em>check_exitFromGroup_with_member_return_OK()</span>
-                            </li>
-                            <li class="level test">
-                                <span><em class="time">
-                                        <div class="time">11 ms</div>
-                                    </em><em class="status">passed</em>check_getGroupDetails_with_not_group_member_should_return_bad_request()</span>
+                                        <div class="time">8 ms</div>
+                                    </em><em class="status">passed</em>check_delete_account_should_return_Bad_Request()</span>
                             </li>
                         </ul>
                     </li>
@@ -732,7 +672,7 @@ jQuery.cookie = function(name, value, options) {
             </div>
         </div>
         <div id="footer">
-            <p>Generated by IntelliJ IDEA on 27.12.2022 13:46</p>
+            <p>Generated by IntelliJ IDEA on 27.12.2022 13:44</p>
         </div>
     </body>
 </html>

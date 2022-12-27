@@ -130,7 +130,7 @@ class GroupControllerTest {
     }
     @Test
     @WithMockUser(roles = {"USER"})
-    void check_createGroup_with_field_error_should_return_OK() throws Exception{
+    void check_createGroup_without_field_error_should_return_OK() throws Exception{
         //given
         group.addMember(user);
         given(userService.getByUsername(this.user.getUsername())).willReturn(user);
