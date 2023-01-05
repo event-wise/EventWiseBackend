@@ -65,12 +65,17 @@ public class UserServiceImpl implements UserService {
         if (Objects.isNull(id)) {
             throw new ObjectIsNullException("ID cannot be null");
         }
-        Set<Event> organized = eventService.getEventsByOrganizerId(id);
-        for(Event event:organized)
-            eventService.delete(event.getId());
-
-
         User user = userDAO.getUserById(id);
+        List<Event> events = eventService.getEventsByUser(user);
+        for(Event event:events){
+            event.rejectedBy(user);
+            if(event.isOrganizer(user)){
+                if (event.getAcceptedMembers().isEmpty())
+                    eventService.delete(event.getId());
+                else
+                    event.assignOrganizer();
+            }
+        }
         Set<Group> groups = new HashSet<>(user.getGroups());
 
 
