@@ -31,6 +31,19 @@ public class GroupServiceImpl implements GroupService {
             throw new ObjectIsNullException("Group cannot be null (group details)");
         }
         group.removeMember(user);
+        List<Event> events = eventService.getEventsByUser(user);
+        for(Event event:events){
+            if(event.getGroup().getId().equals(group.getId())){
+                event.rejectedBy(user);
+                if(event.isOrganizer(user)){
+                    if (event.getAcceptedMembers().isEmpty())
+                        eventService.delete(event.getId());
+                    else
+                        event.assignOrganizer();
+                }
+            }
+        }
+
         if(group.isEmpty()){
             delete(group.getId());
             return;
