@@ -19,7 +19,7 @@ public class AuthEntryPointJWT implements AuthenticationEntryPoint {
                          AuthenticationException authException)
             throws IOException {
         log.error("Unauthorized error: {}", authException.getMessage());
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Unauthorized");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Wrong password");
 
     }
 }

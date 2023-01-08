@@ -83,7 +83,7 @@ public class EventController {
         event = eventService.save(event);
         event.acceptedBy(user);
         event = eventService.save(event);
-        String msg = event.getName() + " created by " + user.getUsername();
+        String msg = event.getName() + " created by " + user.getDisplayedName();
         Log log = Log.builder().group(group).logMessage(msg).build();
         logService.save(log);
         response.setSuccess(true);
@@ -115,7 +115,7 @@ public class EventController {
         event.setType(eventUpdateRequest.getType());
         event.setDescription(eventUpdateRequest.getDescription());
         event = eventService.save(event);
-        String msg = event.getName() + " updated by " + user.getUsername();
+        String msg = event.getName() + " updated by " + user.getDisplayedName();
         Log log = Log.builder().group(group).logMessage(msg).build();
         logService.save(log);
         response.setSuccess(true);
@@ -178,7 +178,7 @@ public class EventController {
         }
         if(!event.getOrganizer().equals(user) && !event.getGroup().isOwner(user))
             throw new GeneralException("Only the organizer or the group owner can delete the event");
-        String msg = event.getName() + " delete by " + user.getUsername();
+        String msg = event.getName() + " deleted by " + user.getDisplayedName();
         eventService.delete(eventId);
         Log log = Log.builder().group(event.getGroup()).logMessage(msg).build();
         logService.save(log);
@@ -203,7 +203,7 @@ public class EventController {
 
         event.acceptedBy(user);
         eventService.save(event);
-        String msg = user.getUsername() + " accepted the event " + event.getName();
+        String msg = user.getDisplayedName() + " accepted the event " + event.getName();
         Log log = Log.builder().group(event.getGroup()).logMessage(
                 msg
         ).build();
@@ -229,7 +229,7 @@ public class EventController {
 
         event.rejectedBy(user);
         eventService.save(event);
-        String msg = user.getUsername() + " rejected the event " + event.getName();
+        String msg = user.getDisplayedName() + " rejected the event " + event.getName();
         Log log = Log.builder().group(event.getGroup()).logMessage(
                 msg
         ).build();

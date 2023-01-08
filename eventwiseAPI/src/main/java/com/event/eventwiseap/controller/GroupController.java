@@ -136,7 +136,7 @@ public class GroupController {
         for(Log log:logs)
             logMessages.add(log.getLogMessage());
         for(User member:group.getGroupMembers())
-            members.add(member.getUsername());
+            members.add(member.getDisplayedName());
 
         return new GroupDetailsDTO(group.getId(), group.isOwner(user),
                 group.getGroupName(), group.getLocation(), group.getDescription(),

@@ -19,6 +19,7 @@ import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 @SuperBuilder
@@ -91,6 +92,13 @@ public class Event extends BaseEntity{
         boolean eventRejected = this.acceptedMembers.remove(user);
         boolean userRejected = user.rejectEvent(this);
         return eventRejected && userRejected;
+    }
+
+    public void assignOrganizer(){
+        if(!this.acceptedMembers.isEmpty()){
+            Iterator<User> it = this.acceptedMembers.iterator();
+            this.organizer = it.next();
+        }
     }
 
 }

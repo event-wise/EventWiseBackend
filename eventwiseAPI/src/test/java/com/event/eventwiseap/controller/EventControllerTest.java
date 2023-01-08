@@ -348,7 +348,7 @@ class EventControllerTest {
 
     @Test
     @WithMockUser(roles = {"USER"})
-    void check_eventDetails_with_member_should_return_bad_request() throws Exception{
+    void check_eventDetails_with_member_should_return_OK() throws Exception{
         event.getGroup().addMember(user);
         user.acceptEvent(event);
         given(userService.getByUsername(this.user.getUsername())).willReturn(user);
@@ -382,6 +382,7 @@ class EventControllerTest {
     void check_deleteEvent_with_not_organizer_should_return_bad_request() throws Exception{
         given(userService.getByUsername(this.user.getUsername())).willReturn(user);
         event.setOrganizer(User.builder().id(2L).build());
+        event.getGroup().setOwner(User.builder().id(2L).build());
         given(eventService.getEventById(event.getId())).willReturn(event);
 
         RequestBuilder request = MockMvcRequestBuilders
